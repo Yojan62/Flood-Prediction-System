@@ -1,0 +1,134 @@
+/* General Body Styles */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7f9;
+    color: #333;
+}
+
+/* Main Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header Styles */
+header {
+    background-color: #ffffff;
+    padding: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    margin: 0;
+    color: #005a9c;
+    font-size: 2em;
+}
+
+/* Main Content Grid */
+main {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    grid-gap: 30px;
+}
+
+/* Card styles for each section */
+.card {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.card h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    color: #005a9c;
+}
+
+/* Map Placeholder */
+#map-container {
+    height: 400px;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 1.2em;
+    color: #6c757d;
+}
+
+#map-card {
+    grid-column: 1 / -1; /* Make map span both columns */
+}
+    
+/* Summary Section */
+#summary .summary-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.1em;
+    padding: 10px 0;
+}
+
+#summary .summary-item strong {
+    color: #005a9c;
+}
+    
+/* Forecast Table */
+#forecast-table-container {
+    grid-column: 1 / -1; /* Make table span both columns */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #005a9c;
+    color: #ffffff;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+tbody tr:hover {
+    background-color: #e9ecef;
+}
+    
+/* Risk Level Styling */
+.risk-low { color: #28a745; font-weight: bold; }
+.risk-medium { color: #ffc107; font-weight: bold; }
+.risk-high { color: #dc3545; font-weight: bold; }
+
+/* Footer */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    background-color: #ffffff;
+    border-top: 1px solid #e0e0e0;
+    font-size: 0.9em;
+    color: #6c757d;
+}
+    
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    main {
+        grid-template-columns: 1fr; /* Stack columns on small screens */
+    }
+}
