@@ -1,34 +1,120 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+# Imports all necessary tools from FastAPI, SQLAlchemy, Pydantic, and SendGrid.
+import os
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+from pydantic import BaseModel
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
-# Create the FastAPI app instance
+# Imports the local files that define the database connection and the table models.
+import database
+import models
+
+# This line tells SQLAlchemy to create any missing tables.
+# It's commented out because the tables are already created in the local database.
+# Teammates can uncomment this to set up their own databases.
+# models.database.Base.metadata.create_all(bind=database.engine)
+
+
+# --- Pydantic Schemas ---
+
+# Defines the shape of data expected when a request is sent to create a new location.
+class LocationCreate(BaseModel):
+    name: str
+    latitude: float
+    longitude: float
+
+
+# --- FastAPI App Instance ---
+
+# Creates the main app that will run the API.
 app = FastAPI()
 
-# This part is important! It's a security setting that allows
-# the frontend website (running on a different address like localhost:3000)
-# to make requests to your backend.
-origins = [
-    "http://localhost:3000",
-]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# --- Database Dependency ---
+
+# A reusable function that gets a database session for each API request.
+# This ensures every connection to the database is properly closed.
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-# This is your dummy endpoint. When a browser requests this URL,
-# this function runs and returns the hard-coded JSON data.
-@app.get("/api/risk/glasgow")
-async def get_risk_for_glasgow():
-    """
-    Returns a hard-coded JSON response for a flood risk in Glasgow.
-    """
-    return {
-        "location": "Glasgow",
-        "risk_level": "LOW",
-        "timestamp": "2025-10-10T23:44:02Z"
-    }
+# --- API Endpoints ---
+
+@app.get("/")
+async def read_root():
+    # The main 'welcome' endpoint to quickly check if the server is running.
+    return {"message": "Flood Prediction API is running!"}
+
+
+@app.get("/api/test-db")
+async def test_database_connection(db: Session = Depends(get_db)):
+    # An endpoint to test if the backend can successfully connect to the database.
+    try:
+        # Wraps the raw SQL 'SELECT 1' query in the text() function for safety.
+        db.execute(text('SELECT 1'))
+        return {"status": "success", "message": "Database connection is working!"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database connection failed: {str(e)}")
+
+
+@app.post("/api/test-email")
+async def send_test_email(to_email: str):
+    # An endpoint to send a test email using SendGrid to verify it works.
+
+    # Loads the SendGrid API key securely from the .env file.
+    sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
+    # Sets the "from" email address. This must be a verified sender in your SendGrid account.
+    from_email_address = os.getenv("SENDGRID_FROM_EMAIL")
+
+    # Checks if the API key and sender email are configured.
+    if not sendgrid_api_key:
+        raise HTTPException(status_code=500, detail="SendGrid API key not configured in .env file")
+    # Updated check for the sender email from the environment.
+    if not from_email_address: # <-- Change this line
+         raise HTTPException(status_code=500, detail="SENDGRID_FROM_EMAIL not configured in .env file.")
+
+    # Creates the email message object with a subject and content.
+    message = Mail(
+        from_email=from_email_address,
+        to_emails=to_email,
+        subject='Test Email from Flood Prediction System',
+        html_content='<strong>This is a test email to confirm SendGrid is working!</strong>'
+    )
+    try:
+        # Creates the SendGrid client and attempts to send the email.
+        sg = SendGridAPIClient(sendgrid_api_key)
+        response = sg.send(message)
+        # Returns the status code from SendGrid if successful.
+        return {"status": "success", "sendgrid_status_code": response.status_code}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to send email: {str(e)}")
+
+
+@app.post("/api/locations")
+async def create_location(location: LocationCreate, db: Session = Depends(get_db)):
+    # An endpoint to add a new location to the 'locations' table.
+
+    # Creates an instance of the SQLAlchemy Location model from the request data.
+    db_location = models.Location(
+        name=location.name,
+        latitude=location.latitude,
+        longitude=location.longitude
+    )
+    
+    # Adds the new location object to the database session.
+    db.add(db_location)
+    
+    # Commits the session to permanently save the new record in the database.
+    db.commit()
+    
+    # Refreshes the object to get the new 'location_id' generated by the database.
+    db.refresh(db_location)
+    
+    # Returns the complete data for the newly created location.
+    return db_location
