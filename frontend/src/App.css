@@ -1,134 +1,179 @@
-/* General Body Styles */
+/* Light Theme Variables (Default) */
+:root {
+  --background-color: #F8F9FA;
+  --text-color: #343A40;
+  --card-background: #FFFFFF;
+  --primary-accent: #556B2F; /* Muted Green */
+  --risk-low: #28A745;
+  --risk-medium: #FFC107;
+  --risk-high: #DC3545;
+  --card-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* Dark Theme Variables */
+/* These are applied when the body element has the 'dark-theme' class */
+body.dark-theme {
+  --background-color: #1A1A1A;
+  --text-color: #E0E0E0;
+  --card-background: #2C2C2C;
+  --primary-accent: #00BFFF; /* Electric Blue */
+  --risk-low: #39FF14;      /* Neon Green */
+  --risk-medium: #FFFF00;   /* Bright Yellow */
+  --risk-high: #FF1F1F;      /* Bright Red */
+  --card-shadow: 0 4px 12px rgba(0, 191, 255, 0.1); /* Subtle blue glow */
+
+  --table-row-even-background: #3a3a3a; /* Slightly ligther grey for dark theme even*/
+}
+
+/* --- General Styles --- */
+
+/* Apply base styles using variables */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f7f9;
-    color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  /* Add transition for smooth theme changes */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Main Container */
+/* Main content container */
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
-/* Header Styles */
+/* Main content grid layout */
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two equal columns */
+  grid-gap: 30px;
+}
+
+/* --- Component Styles --- */
+
+/* Header */
 header {
-    background-color: #ffffff;
-    padding: 20px;
-    border-bottom: 2px solid #e0e0e0;
-    text-align: center;
-    margin-bottom: 30px;
+  background-color: var(--card-background); /* Use card background for header too */
+  padding: 20px;
+  border-bottom: 2px solid #e0e0e0; /* Consider making border color a variable */
+  text-align: center;
+  margin-bottom: 30px;
+  transition: background-color 0.3s ease;
 }
 
 header h1 {
-    margin: 0;
-    color: #005a9c;
-    font-size: 2em;
+  margin: 0;
+  color: var(--primary-accent);
+  font-size: 2em;
+  transition: color 0.3s ease;
 }
 
-/* Main Content Grid */
-main {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Two equal columns */
-    grid-gap: 30px;
-}
-
-/* Card styles for each section */
+/* Generic Card Style */
 .card {
-    background-color: #ffffff;
-    padding: 25px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  background-color: var(--card-background);
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .card h2 {
-    margin-top: 0;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    color: #005a9c;
+  margin-top: 0;
+  border-bottom: 1px solid #eee; /* Consider making border color a variable */
+  padding-bottom: 10px;
+  color: var(--primary-accent);
+  transition: color 0.3s ease;
 }
 
-/* Map Placeholder */
-#map-container {
-    height: 400px;
-    background-color: #e9ecef;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px;
-    font-size: 1.2em;
-    color: #6c757d;
-}
-
+/* Specific Card Layouts */
 #map-card {
-    grid-column: 1 / -1; /* Make map span both columns */
+  grid-column: 1 / -1; /* Make map span both columns */
 }
-    
-/* Summary Section */
+
+#map-container {
+  height: 400px;
+  background-color: #e9ecef; /* Placeholder color, might need dark theme variant */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 1.2em;
+  color: #6c757d; /* Placeholder color, might need dark theme variant */
+}
+
 #summary .summary-item {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1.1em;
-    padding: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1em;
+  padding: 10px 0;
 }
 
 #summary .summary-item strong {
-    color: #005a9c;
-}
-    
-/* Forecast Table */
-#forecast-table-container {
-    grid-column: 1 / -1; /* Make table span both columns */
+  color: var(--primary-accent);
+  transition: color 0.3s ease;
 }
 
+#forecast-table-container {
+  grid-column: 1 / -1; /* Make table span both columns */
+}
+
+/* Table Styles */
 table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
 }
 
 th, td {
-    padding: 12px 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #ddd; /* Consider making border color a variable */
 }
 
 th {
-    background-color: #005a9c;
-    color: #ffffff;
+  background-color: var(--primary-accent);
+  color: var(--card-background); /* Text color contrasts with accent */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Consider adding dark theme variables for table row backgrounds */
 tbody tr:nth-child(even) {
-    background-color: #f8f9fa;
+  background-color: var(--table-row-even-background, #f8f9fa); /* Default to light theme color */
+  transition: background-color 0.3s ease; /* Add transition */
 }
 
 tbody tr:hover {
-    background-color: #e9ecef;
+  background-color: #e9ecef;
 }
-    
-/* Risk Level Styling */
-.risk-low { color: #28a745; font-weight: bold; }
-.risk-medium { color: #ffc107; font-weight: bold; }
-.risk-high { color: #dc3545; font-weight: bold; }
+
+body.dark-theme tbody tr:hover {
+  background-color: #4a4a4a; /* Slightly lighter hover for dark */
+}
+
+/* Risk Level Text Colors */
+.risk-low { color: var(--risk-low); font-weight: bold; }
+.risk-medium { color: var(--risk-medium); font-weight: bold; }
+.risk-high { color: var(--risk-high); font-weight: bold; }
 
 /* Footer */
 footer {
-    text-align: center;
-    padding: 20px;
-    margin-top: 40px;
-    background-color: #ffffff;
-    border-top: 1px solid #e0e0e0;
-    font-size: 0.9em;
-    color: #6c757d;
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  background-color: var(--card-background); /* Use card background */
+  border-top: 1px solid #e0e0e0; /* Consider making border color a variable */
+  font-size: 0.9em;
+  color: #6c757d; /* Might need dark theme variant */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
-    
-/* Responsive design for smaller screens */
+
+/* --- Responsive Design --- */
 @media (max-width: 768px) {
-    main {
-        grid-template-columns: 1fr; /* Stack columns on small screens */
-    }
+  main {
+    grid-template-columns: 1fr; /* Stack columns on small screens */
+  }
 }

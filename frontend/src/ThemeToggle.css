@@ -1,0 +1,51 @@
+/* Styling for the theme toggle switch */
+.theme-toggle-switch {
+  cursor: pointer;
+  background-color: #ccc; /* Background of the switch track (light theme) */
+  border: none;
+  border-radius: 30px; /* Rounded ends for the track */
+  padding: 3px; /* Padding around the circle */
+  width: 50px; /* Width of the track */
+  height: 26px; /* Height of the track */
+  display: flex;
+  align-items: center;
+  position: absolute; /* Keep positioning */
+  top: 15px;
+  right: 15px;
+  z-index: 1000;
+  transition: background-color 0.3s ease; /* Smooth background transition */
+  box-sizing: border-box; /* Include padding/border in size */
+}
+
+/* Styling for the sliding circle */
+.slider-circle {
+  background-color: white;
+  border-radius: 50%; /* Make it a circle */
+  width: 20px; /* Diameter of the circle */
+  height: 20px; /* Diameter of the circle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  /* Animation for sliding */
+  transition: transform 0.3s ease;
+  transform: translateX(0px); /* Start position (left) */
+}
+
+/* Styles when the theme is dark */
+.theme-toggle-switch.dark {
+  background-color: var(--primary-accent); /* Use dark theme accent for track */
+}
+
+.theme-toggle-switch.dark .slider-circle {
+  /* Move the circle to the right (50px width - 20px circle - 2*3px padding = 24px) */
+  transform: translateX(24px);
+}
+
+/* Icon colors */
+.slider-circle .icon-light {
+  color: #f39c12; /* Sun color */
+}
+.slider-circle .icon-dark {
+  color: #4a4a4a; /* Moon color */
+}

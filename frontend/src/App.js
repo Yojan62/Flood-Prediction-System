@@ -1,8 +1,32 @@
-import React from 'react';
-import './App.css'; // This imports all the styles from App.css
+import React, {useState, useEffect} from 'react';
+import ThemeToggle from './ThemeToggle';
+import './App.css'; // Main styles
+
+// Import all the new components
+import Header from './Header';
+import MapCard from './MapCard';
+import SummaryCard from './SummaryCard';
+import InsightsCard from './InsightsCard';
+import ForecastTable from './ForecastTable';
+import WeatherWidget from './WeatherWidget';
+import Footer from './Footer';
 
 function App() {
-  // 1. Sample data that you would normally get from your backend API
+  // State to manage the current theme ('light' or 'dark')
+  const [theme, setTheme] = useState('light'); // Default to light theme
+
+  // Function to toggle the theme
+  const toggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
+
+  // Effect to add/remove the theme class on the body element
+  useEffect(() => {
+    document.body.className = ''; // Clear existing classes first
+    document.body.classList.add(theme + '-theme'); // Add 'light-theme' or 'dark-theme'
+  }, [theme]); // Run this effect whenever the theme state changes
+
+  // Sample forecast data (kept in App.js for now)
   const forecastData = [
     { time: "16:00", level: 2.8, risk: "Low" },
     { time: "19:00", level: 3.1, risk: "Medium" },
@@ -14,95 +38,35 @@ function App() {
     { time: "13:00", level: 2.5, risk: "Low" }
   ];
 
-  // 2. A helper function to apply the correct color style based on risk
-  const getRiskClass = (risk) => {
-    if (risk === 'Low') return 'risk-low';
-    if (risk === 'Medium') return 'risk-medium';
-    if (risk === 'High') return 'risk-high';
-    return ''; // Default case
-  };
-
-  // The main component structure
   return (
-    // Using a React Fragment <> to wrap everything
+    // Uses a React Fragment (<>) to group the components
     <>
-      <header>
-        <h1>Flood Forecasting Dashboard</h1>
-      </header>
+      {/* Renders the Header component */}
+      <Header />
 
+      {/* Main container for the dashboard content */}
       <div className="container">
         <main>
-          {/* Map Section */}
-          <div className="card" id="map-card">
-            <h2>Monitored Location: Dhaka, Bangladesh</h2>
-            <div id="map-container">
-              <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3747020.0084224283!2d87.69690045610567!3d23.489332519505908!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x30adaaed80e18ba7%3A0xf2d28e0c4e1fc6b!2sBangladesh!5e0!3m2!1sen!2suk!4v1760384791432!5m2!1sen!2suk" 
-                width="100%" 
-                height="400" 
-                style={{ border: 0 }} 
-                allowFullScreen="" 
-                loading="lazy" 
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Map of Bangladesh"
-              ></iframe>
-            </div>
-          </div>
-
-          {/* Summary Section */}
-          <div className="card" id="summary">
-            <h2>Forecast Summary</h2>
-            <div className="summary-item">
-              <span>Current Risk Level:</span>
-              <strong className="risk-medium">Medium</strong>
-            </div>
-            <div className="summary-item">
-              <span>Peak Water Level (24h):</span>
-              <strong>3.4 meters</strong>
-            </div>
-            <div className="summary-item">
-              <span>Last Updated:</span>
-              <strong>13/10/2025, 21:42 BST</strong>
-            </div>
-          </div>
-
-          {/* AI Insights Section */}
-          <div className="card" id="insights">
-            <h2>AI Model Insights</h2>
-            <p>The model predicts a gradual rise in water levels over the next 12 hours due to sustained rainfall. The risk level is expected to peak at 'High' around 01:00.</p>
-          </div>
-          
-          {/* Forecast Table Section */}
-          <div className="card" id="forecast-table-container">
-            <h2>Detailed 24-Hour Forecast</h2>
-            <table>
-              <thead>
-                <tr>
-                  <th>Time (BST)</th>
-                  <th>Predicted Water Level (meters)</th>
-                  <th>Risk Level</th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* 3. This is the "React way" to loop through data and create table rows */}
-                {forecastData.map((dataPoint, index) => (
-                  <tr key={index}>
-                    <td>{dataPoint.time}</td>
-                    <td>{dataPoint.level.toFixed(1)}</td>
-                    <td className={getRiskClass(dataPoint.risk)}>{dataPoint.risk}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          {/* Renders the ThemeToggle component, passing current theme and toggle function as props */}
+          <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+          {/* Renders the MapCard component */}
+          <MapCard />
+          {/* Renders the SummaryCard component */}
+          <SummaryCard />
+          {/* Renders the InsightsCard component */}
+          <InsightsCard />
+          {/* Renders the ForecastTable component, passing the data as a prop */}
+          <ForecastTable forecastData={forecastData} />
+          {/* Renders the WeatherWidget component */}
+          <WeatherWidget />
         </main>
       </div>
 
-      <footer>
-        <p>© 2025 Flood Prediction Project. All rights reserved.</p>
-      </footer>
+      {/* Renders the Footer component */}
+      <Footer />
     </>
   );
 }
 
+// Exports the App component to be used in index.js
 export default App;
