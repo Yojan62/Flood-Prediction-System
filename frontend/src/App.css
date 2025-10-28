@@ -1,179 +1,229 @@
 /* Light Theme Variables (Default) */
 :root {
-  --background-color: #F8F9FA;
-  --text-color: #343A40;
-  --card-background: #FFFFFF;
-  --primary-accent: #556B2F; /* Muted Green */
-  --risk-low: #28A745;
-  --risk-medium: #FFC107;
-  --risk-high: #DC3545;
-  --card-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  /* Defines the main colors and styles for the light theme. */
+  --background-color: #F8F9FA; /* Sets the overall page background color. */
+  --text-color: #343A40; /* Sets the default text color. */
+  --card-background: #FFFFFF; /* Sets the background color for card elements. */
+  --primary-accent: #556B2F; /* Sets the main accent color (e.g., for headings). Muted Green */
+  --risk-low: #28A745; /* Sets the color for 'Low' risk indicators. */
+  --risk-medium: #FFC107; /* Sets the color for 'Medium' risk indicators. */
+  --risk-high: #DC3545; /* Sets the color for 'High' risk indicators. */
+  --card-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Defines the shadow effect for cards. */
 }
 
 /* Dark Theme Variables */
-/* These are applied when the body element has the 'dark-theme' class */
+/* These styles override the :root variables when the body has the 'dark-theme' class. */
 body.dark-theme {
-  --background-color: #1A1A1A;
-  --text-color: #E0E0E0;
-  --card-background: #2C2C2C;
-  --primary-accent: #00BFFF; /* Electric Blue */
-  --risk-low: #39FF14;      /* Neon Green */
-  --risk-medium: #FFFF00;   /* Bright Yellow */
-  --risk-high: #FF1F1F;      /* Bright Red */
-  --card-shadow: 0 4px 12px rgba(0, 191, 255, 0.1); /* Subtle blue glow */
+  /* Defines the main colors and styles for the dark theme. */
+  --background-color: #1A1A1A; /* Dark page background. */
+  --text-color: #E0E0E0; /* Light text color for contrast. */
+  --card-background: #2C2C2C; /* Darker card background. */
+  --primary-accent: #00BFFF; /* Bright accent color. Electric Blue */
+  --risk-low: #39FF14;      /* Bright risk color. Neon Green */
+  --risk-medium: #FFFF00;   /* Bright risk color. Bright Yellow */
+  --risk-high: #FF1F1F;      /* Bright risk color. Bright Red */
+  --card-shadow: 0 4px 12px rgba(0, 191, 255, 0.1); /* Adds a subtle blue glow effect. */
 
-  --table-row-even-background: #3a3a3a; /* Slightly ligther grey for dark theme even*/
+  --table-row-even-background: #3a3a3a; /* Defines a specific background for even table rows in dark mode. */
+}
+
+/* --- Custom Leaflet Popup Styles --- */
+
+/* Base style for the popup container. */
+.custom-popup .leaflet-popup-content-wrapper {
+  background-color: var(--card-background); /* Uses the theme's card background. */
+  color: var(--text-color); /* Uses the theme's text color. */
+  border-radius: 8px; /* Rounds the corners. */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Adds a standard shadow. */
+  border: 1px solid var(--primary-accent); /* Adds an optional border using the theme's accent color. */
+}
+
+/* Styles the small arrow (tip) of the popup. */
+.custom-popup .leaflet-popup-tip {
+  background-color: var(--card-background); /* Matches the popup background color. */
+}
+
+/* Styles the content text inside the popup. */
+.custom-popup .leaflet-popup-content {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Standard system font stack. */
+  font-size: 14px; /* Sets the font size. */
+  line-height: 1.5; /* Sets the line spacing. */
+  margin: 10px 15px; /* Adds padding inside the popup. */
+}
+
+/* Styles the container for the emoji marker (removes default Leaflet background/border). */
+.leaflet-emoji-icon {
+    background: none;
+    border: none;
 }
 
 /* --- General Styles --- */
 
-/* Apply base styles using variables */
+/* Applies base styles to the entire page body using CSS variables. */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
-  background-color: var(--background-color);
-  color: var(--text-color);
-  /* Add transition for smooth theme changes */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Sets the default font. */
+  line-height: 1.6; /* Sets default line spacing. */
+  margin: 0; /* Removes default browser margin. */
+  padding: 0; /* Removes default browser padding. */
+  background-color: var(--background-color); /* Applies the theme's background color. */
+  color: var(--text-color); /* Applies the theme's text color. */
+  /* Adds a smooth transition effect when theme colors change. */
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Main content container */
+/* Styles the main content container, centering it and setting a max width. */
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width: 1200px; /* Limits the maximum width of the content area. */
+  margin: 0 auto; /* Centers the container horizontally. */
+  padding: 20px; /* Adds padding around the content. */
 }
 
-/* Main content grid layout */
+/* Sets up the main content area using a CSS grid with two equal columns and spacing. */
 main {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Two equal columns */
-  grid-gap: 30px;
+  grid-template-columns: 1fr 1fr; /* Creates two columns of equal width. */
+  grid-gap: 30px; /* Sets the space between grid items. */
 }
 
 /* --- Component Styles --- */
 
-/* Header */
+/* Styles the header section. */
 header {
-  background-color: var(--card-background); /* Use card background for header too */
-  padding: 20px;
-  border-bottom: 2px solid #e0e0e0; /* Consider making border color a variable */
-  text-align: center;
-  margin-bottom: 30px;
-  transition: background-color 0.3s ease;
+  background-color: var(--card-background); /* Uses the theme's card background color. */
+  padding: 20px; /* Adds padding inside the header. */
+  border-bottom: 2px solid #e0e0e0; /* Adds a bottom border (consider using a variable). */
+  text-align: center; /* Centers the header content. */
+  margin-bottom: 30px; /* Adds space below the header. */
+  transition: background-color 0.3s ease; /* Smooth transition for theme change. */
 }
 
+/* Styles the main heading within the header. */
 header h1 {
-  margin: 0;
-  color: var(--primary-accent);
-  font-size: 2em;
-  transition: color 0.3s ease;
+  margin: 0; /* Removes default margin. */
+  color: var(--primary-accent); /* Uses the theme's accent color. */
+  font-size: 2em; /* Sets the font size. */
+  transition: color 0.3s ease; /* Smooth transition for theme change. */
 }
 
-/* Generic Card Style */
+/* Defines the base style for all card elements. */
 .card {
-  background-color: var(--card-background);
-  padding: 25px;
-  border-radius: 8px;
-  box-shadow: var(--card-shadow);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  background-color: var(--card-background); /* Uses the theme's card background color. */
+  padding: 25px; /* Adds padding inside the card. */
+  border-radius: 8px; /* Rounds the corners of the card. */
+  box-shadow: var(--card-shadow); /* Applies the theme's shadow effect. */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for theme change. */
 }
 
+/* Styles the secondary headings (h2) within cards. */
 .card h2 {
-  margin-top: 0;
-  border-bottom: 1px solid #eee; /* Consider making border color a variable */
-  padding-bottom: 10px;
-  color: var(--primary-accent);
-  transition: color 0.3s ease;
+  margin-top: 0; /* Removes default top margin. */
+  border-bottom: 1px solid #eee; /* Adds a bottom border (consider using a variable). */
+  padding-bottom: 10px; /* Adds space below the heading text. */
+  color: var(--primary-accent); /* Uses the theme's accent color. */
+  transition: color 0.3s ease; /* Smooth transition for theme change. */
 }
 
-/* Specific Card Layouts */
+/* --- Specific Card Layouts --- */
+
+/* Makes the map card span across both columns of the grid. */
 #map-card {
-  grid-column: 1 / -1; /* Make map span both columns */
+  grid-column: 1 / -1;
 }
 
+/* Styles the placeholder container for the map (used if map library fails). */
 #map-container {
-  height: 400px;
-  background-color: #e9ecef; /* Placeholder color, might need dark theme variant */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  font-size: 1.2em;
-  color: #6c757d; /* Placeholder color, might need dark theme variant */
+  height: 400px; /* Sets a fixed height for the map area. */
+  background-color: #e9ecef; /* Placeholder background (consider dark theme variable). */
+  display: flex; /* Enables flexbox for centering content. */
+  align-items: center; /* Vertically centers content. */
+  justify-content: center; /* Horizontally centers content. */
+  border-radius: 8px; /* Rounds the corners. */
+  font-size: 1.2em; /* Sets font size for placeholder text. */
+  color: #6c757d; /* Sets color for placeholder text (consider dark theme variable). */
 }
 
+/* Styles individual items within the summary card using flexbox for alignment. */
 #summary .summary-item {
   display: flex;
-  justify-content: space-between;
-  font-size: 1.1em;
-  padding: 10px 0;
+  justify-content: space-between; /* Pushes items to opposite ends. */
+  font-size: 1.1em; /* Sets font size. */
+  padding: 10px 0; /* Adds vertical padding. */
 }
 
+/* Styles the emphasized text (strong tag) within summary items. */
 #summary .summary-item strong {
-  color: var(--primary-accent);
-  transition: color 0.3s ease;
+  color: var(--primary-accent); /* Uses the theme's accent color. */
+  transition: color 0.3s ease; /* Smooth transition for theme change. */
 }
 
+/* Makes the forecast table container span across both columns. */
 #forecast-table-container {
-  grid-column: 1 / -1; /* Make table span both columns */
+  grid-column: 1 / -1;
 }
 
-/* Table Styles */
+/* --- Table Styles --- */
+
+/* Basic styles for the table element. */
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
+  width: 100%; /* Makes the table take full width of its container. */
+  border-collapse: collapse; /* Collapses cell borders into a single border. */
+  margin-top: 20px; /* Adds space above the table. */
 }
 
+/* Styles for table header (th) and data (td) cells. */
 th, td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd; /* Consider making border color a variable */
+  padding: 12px 15px; /* Adds padding inside cells. */
+  text-align: left; /* Aligns text to the left. */
+  border-bottom: 1px solid #ddd; /* Adds a bottom border to cells (consider variable). */
 }
 
+/* Styles specifically for table header cells. */
 th {
-  background-color: var(--primary-accent);
-  color: var(--card-background); /* Text color contrasts with accent */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  background-color: var(--primary-accent); /* Uses the theme's accent color for the header background. */
+  color: var(--card-background); /* Sets text color to contrast with the accent background. */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change. */
 }
 
-/* Consider adding dark theme variables for table row backgrounds */
+/* Adds alternating background color to even rows in the table body. */
 tbody tr:nth-child(even) {
-  background-color: var(--table-row-even-background, #f8f9fa); /* Default to light theme color */
-  transition: background-color 0.3s ease; /* Add transition */
+  background-color: var(--table-row-even-background, #f8f9fa); /* Uses the theme variable, defaults to light grey. */
+  transition: background-color 0.3s ease; /* Smooth transition for theme change. */
 }
 
+/* Styles table rows on hover for the light theme. */
 tbody tr:hover {
-  background-color: #e9ecef;
+  background-color: #e9ecef; /* Light grey hover effect. */
 }
 
+/* Styles table rows on hover specifically for the dark theme. */
 body.dark-theme tbody tr:hover {
-  background-color: #4a4a4a; /* Slightly lighter hover for dark */
+  background-color: #4a4a4a; /* Darker grey hover effect. */
 }
 
-/* Risk Level Text Colors */
+/* --- Risk Level Text Colors --- */
+/* Applies specific colors and bold font weight based on risk level classes. */
 .risk-low { color: var(--risk-low); font-weight: bold; }
 .risk-medium { color: var(--risk-medium); font-weight: bold; }
 .risk-high { color: var(--risk-high); font-weight: bold; }
 
-/* Footer */
+/* --- Footer --- */
+/* Styles the footer section. */
 footer {
-  text-align: center;
-  padding: 20px;
-  margin-top: 40px;
-  background-color: var(--card-background); /* Use card background */
-  border-top: 1px solid #e0e0e0; /* Consider making border color a variable */
-  font-size: 0.9em;
-  color: #6c757d; /* Might need dark theme variant */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  text-align: center; /* Centers the footer content. */
+  padding: 20px; /* Adds padding. */
+  margin-top: 40px; /* Adds space above the footer. */
+  background-color: var(--card-background); /* Uses the theme's card background color. */
+  border-top: 1px solid #e0e0e0; /* Adds a top border (consider variable). */
+  font-size: 0.9em; /* Sets font size. */
+  color: #6c757d; /* Sets text color (consider dark theme variable). */
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change. */
 }
 
 /* --- Responsive Design --- */
+/* Media query for smaller screens (tablets and below). */
 @media (max-width: 768px) {
+  /* Changes the main content grid to a single column layout. */
   main {
-    grid-template-columns: 1fr; /* Stack columns on small screens */
+    grid-template-columns: 1fr; /* Stacks grid items vertically. */
   }
 }
