@@ -28,7 +28,7 @@ class User(database.Base):
 
     # Here, I define each column for the 'users' table.
     user_id = Column(Integer, primary_key=True, index=True)
-    phone_number = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
     
     # This column links a user to a location using a foreign key.
     subscribed_location_id = Column(Integer, ForeignKey("locations.location_id"))
