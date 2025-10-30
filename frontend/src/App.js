@@ -3,17 +3,16 @@ import axios from 'axios'; // Imports axios for making HTTP requests.
 import './App.css'; // Imports the main CSS styles.
 
 // --- Imports all the UI components ---
-import Header from './Header';
-import MapCard from './MapCard';
-import SummaryCard from './SummaryCard';
+import Header from './components/Header';
+import MapCard from './components/MapCard';
+import SummaryCard from './components/SummaryCard';
 // import InsightsCard from './InsightsCard'; // No longer in use.
-import ForecastTable from './ForecastTable';
-import WeatherWidget from './WeatherWidget';
-import Footer from './Footer';
-import AlertSubscriptionCard from './AlertSubscriptionCard';
-import SafetyRecommendationsCard from './SafetyRecommendationsCard';
-import ThemeToggle from './ThemeToggle';
-import Search from './Search'; // Imports the new Search component.
+import ForecastTable from './components/ForecastTable';
+import WeatherWidget from './components/WeatherWidget';
+import Footer from './components/Footer';
+import AlertSubscriptionCard from './components/AlertSubscriptionCard';
+import SafetyRecommendationsCard from './components/SafetyRecommendationsCard';
+import Search from './components/Search'; 
 
 // Defines the main application component.
 function App() {
@@ -88,11 +87,8 @@ function App() {
   return (
     // Uses a React Fragment (<>) to group all components.
     <>
-      {/* Renders the theme toggle switch, passing the current theme and toggle function. */}
-      <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
-
-      {/* Renders the Header component. */}
-      <Header />
+      {/* Renders the Header component, passing the theme props to it */}
+      <Header theme={theme} toggleTheme={toggleTheme} />
 
       {/* Main container for the dashboard content. */}
       <div className="container">

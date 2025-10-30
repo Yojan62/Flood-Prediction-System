@@ -98,6 +98,11 @@ header {
   text-align: center; /* Centers the header content. */
   margin-bottom: 30px; /* Adds space below the header. */
   transition: background-color 0.3s ease; /* Smooth transition for theme change. */
+
+  display: flex; /* Uses flexbox for layout. */
+  align-items: center; /* Vertically centers items. */
+  justify-content: center; /* Horizontally centers items. */
+  position: relative; /* Allows absolute positioning of child elements. */
 }
 
 /* Styles the main heading within the header. */

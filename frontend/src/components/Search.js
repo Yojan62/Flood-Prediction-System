@@ -23,7 +23,11 @@ function Search({ initialCity, onCityChange }) {
           value={cityInput}
           onChange={(e) => setCityInput(e.target.value)}
           placeholder="Enter city name to update map and weather"
-          style={{ flexGrow: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+          style={{ 
+            flexGrow: 1, 
+            padding: '10px', 
+            borderRadius: '20px', 
+            border: '1px solid #ccc' }}
         />
         <button
           type="submit"

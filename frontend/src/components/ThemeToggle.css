@@ -9,12 +9,13 @@
   height: 26px; /* Sets the total height of the switch. */
   display: flex; /* Uses flexbox to align the inner circle. */
   align-items: center; /* Vertically centers the inner circle. */
-  position: absolute; /* Allows positioning relative to the nearest positioned ancestor. */
-  top: 15px; /* Positions the switch from the top edge. */
-  right: 15px; /* Positions the switch from the right edge. */
-  z-index: 1000; /* Ensures the switch stays on top of other content. */
   transition: background-color 0.3s ease; /* Adds a smooth transition for the background color change. */
   box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height. */
+  position: absolute; /* Positions the switch absolutely within its parent container. */
+  top: 50%; /* Center it vertically in the parent container */
+  right: 20px; /* Place it 20px from the right edge */
+  transform: translateY(-50%); /* Vertically centers the switch in its container. */
+  z-index: 1000; /* Ensures the switch appears above other elements. */
 }
 
 /* Styling for the sliding circle (the 'thumb') inside the switch. */
