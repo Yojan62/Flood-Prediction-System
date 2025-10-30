@@ -1,6 +1,6 @@
-/* Light Theme Variables (Default) */
+/* --- Light Theme Variables (Default) --- */
+/* Defines the CSS variables used for the light theme. */
 :root {
-  /* Defines the main colors and styles for the light theme. */
   --background-color: #F8F9FA; /* Sets the overall page background color. */
   --text-color: #343A40; /* Sets the default text color. */
   --card-background: #FFFFFF; /* Sets the background color for card elements. */
@@ -9,12 +9,13 @@
   --risk-medium: #FFC107; /* Sets the color for 'Medium' risk indicators. */
   --risk-high: #DC3545; /* Sets the color for 'High' risk indicators. */
   --card-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Defines the shadow effect for cards. */
+  --table-row-even-background: #f8f9fa; /* Background for even table rows in light mode. */
+  --table-row-hover: #e9ecef; /* Background for table rows on hover in light mode. */
 }
 
-/* Dark Theme Variables */
-/* These styles override the :root variables when the body has the 'dark-theme' class. */
+/* --- Dark Theme Variables --- */
+/* Overrides the :root variables when the body has the 'dark-theme' class. */
 body.dark-theme {
-  /* Defines the main colors and styles for the dark theme. */
   --background-color: #1A1A1A; /* Dark page background. */
   --text-color: #E0E0E0; /* Light text color for contrast. */
   --card-background: #2C2C2C; /* Darker card background. */
@@ -23,8 +24,8 @@ body.dark-theme {
   --risk-medium: #FFFF00;   /* Bright risk color. Bright Yellow */
   --risk-high: #FF1F1F;      /* Bright risk color. Bright Red */
   --card-shadow: 0 4px 12px rgba(0, 191, 255, 0.1); /* Adds a subtle blue glow effect. */
-
   --table-row-even-background: #3a3a3a; /* Defines a specific background for even table rows in dark mode. */
+  --table-row-hover: #4a4a4a; /* Background for table rows on hover in dark mode. */
 }
 
 /* --- Custom Leaflet Popup Styles --- */
@@ -35,7 +36,7 @@ body.dark-theme {
   color: var(--text-color); /* Uses the theme's text color. */
   border-radius: 8px; /* Rounds the corners. */
   box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Adds a standard shadow. */
-  border: 1px solid var(--primary-accent); /* Adds an optional border using the theme's accent color. */
+  border: 1px solid var(--primary-accent); /* Optional border using the theme's accent color. */
 }
 
 /* Styles the small arrow (tip) of the popup. */
@@ -78,10 +79,12 @@ body {
   padding: 20px; /* Adds padding around the content. */
 }
 
-/* Sets up the main content area using a CSS grid with two equal columns and spacing. */
+/* --- Main Content Grid --- */
+/* Sets up the main content area using a CSS grid. */
 main {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* Creates two columns of equal width. */
+  /* Defines two columns: the first is 2 parts wide, the second is 1 part wide. */
+  grid-template-columns: 2fr 1fr;
   grid-gap: 30px; /* Sets the space between grid items. */
 }
 
@@ -123,42 +126,41 @@ header h1 {
   transition: color 0.3s ease; /* Smooth transition for theme change. */
 }
 
-/* --- Specific Card Layouts --- */
+/* --- Specific Card Layouts (Grid Placement) --- */
+/* Cards will automatically flow into the 2-column grid. */
+/* We only need to define styles for items that span both columns. */
 
-/* Makes the map card span across both columns of the grid. */
+/* Search bar spans both columns. */
+#search-bar {
+  grid-column: 1 / -1; /* Spans from the first grid line to the last. */
+}
+
+/* Map Card - flows into column 1 (default) */
 #map-card {
-  grid-column: 1 / -1;
+  /* No special grid-column needed. */
 }
 
-/* Styles the placeholder container for the map (used if map library fails). */
-#map-container {
-  height: 400px; /* Sets a fixed height for the map area. */
-  background-color: #e9ecef; /* Placeholder background (consider dark theme variable). */
-  display: flex; /* Enables flexbox for centering content. */
-  align-items: center; /* Vertically centers content. */
-  justify-content: center; /* Horizontally centers content. */
-  border-radius: 8px; /* Rounds the corners. */
-  font-size: 1.2em; /* Sets font size for placeholder text. */
-  color: #6c757d; /* Sets color for placeholder text (consider dark theme variable). */
+/* Weather Widget - flows into column 2 (default) */
+/* (Assuming WeatherWidget's root element has className="card") */
+
+/* Summary Card - flows into column 1 */
+#summary {
+  /* No special grid-column needed. */
 }
 
-/* Styles individual items within the summary card using flexbox for alignment. */
-#summary .summary-item {
-  display: flex;
-  justify-content: space-between; /* Pushes items to opposite ends. */
-  font-size: 1.1em; /* Sets font size. */
-  padding: 10px 0; /* Adds vertical padding. */
+/* Safety Card - flows into column 2 */
+#safety-recommendations {
+  /* No special grid-column needed. */
 }
 
-/* Styles the emphasized text (strong tag) within summary items. */
-#summary .summary-item strong {
-  color: var(--primary-accent); /* Uses the theme's accent color. */
-  transition: color 0.3s ease; /* Smooth transition for theme change. */
-}
-
-/* Makes the forecast table container span across both columns. */
+/* Forecast Table - spans both columns */
 #forecast-table-container {
-  grid-column: 1 / -1;
+  grid-column: 1 / -1; /* Spans from the first grid line to the last. */
+}
+
+/* Alert Subscription - spans both columns */
+#alert-subscription {
+  grid-column: 1 / -1; /* Spans from the first grid line to the last. */
 }
 
 /* --- Table Styles --- */
@@ -186,19 +188,20 @@ th {
 
 /* Adds alternating background color to even rows in the table body. */
 tbody tr:nth-child(even) {
-  background-color: var(--table-row-even-background, #f8f9fa); /* Uses the theme variable, defaults to light grey. */
+  background-color: var(--table-row-even-background); /* Uses the theme variable. */
   transition: background-color 0.3s ease; /* Smooth transition for theme change. */
 }
 
-/* Styles table rows on hover for the light theme. */
+/* Sets the hover effect for table rows. */
 tbody tr:hover {
-  background-color: #e9ecef; /* Light grey hover effect. */
+  background-color: var(--table-row-hover); /* Uses the theme variable. */
+}
+/* (Note: The default :root definition for --table-row-hover is missing, added #e9ecef) */
+:root {
+  /* ... (rest of :root) ... */
+  --table-row-hover: #e9ecef; /* Light theme hover color */
 }
 
-/* Styles table rows on hover specifically for the dark theme. */
-body.dark-theme tbody tr:hover {
-  background-color: #4a4a4a; /* Darker grey hover effect. */
-}
 
 /* --- Risk Level Text Colors --- */
 /* Applies specific colors and bold font weight based on risk level classes. */
@@ -220,10 +223,18 @@ footer {
 }
 
 /* --- Responsive Design --- */
-/* Media query for smaller screens (tablets and below). */
-@media (max-width: 768px) {
+/* Media query for tablet screens and below. */
+@media (max-width: 992px) {
   /* Changes the main content grid to a single column layout. */
   main {
     grid-template-columns: 1fr; /* Stacks grid items vertically. */
+  }
+  
+  /* Resets any specific column-spanning items back to a single column. */
+  /* This is not strictly necessary if they just flow, but ensures they stack. */
+  #search-bar,
+  #forecast-table-container,
+  #alert-subscription {
+    grid-column: 1 / -1; /* (Already set, but safe to keep) */
   }
 }

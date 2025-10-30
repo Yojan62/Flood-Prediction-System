@@ -1,34 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import './App.css'; // Main styles
+import axios from 'axios'; // Imports axios for making HTTP requests.
+import './App.css'; // Imports the main CSS styles.
 
-// Import all the components
+// --- Imports all the UI components ---
 import Header from './Header';
 import MapCard from './MapCard';
 import SummaryCard from './SummaryCard';
-// import InsightsCard from './InsightsCard'; // Commented out as per plan
+// import InsightsCard from './InsightsCard'; // No longer in use.
 import ForecastTable from './ForecastTable';
 import WeatherWidget from './WeatherWidget';
 import Footer from './Footer';
 import AlertSubscriptionCard from './AlertSubscriptionCard';
 import SafetyRecommendationsCard from './SafetyRecommendationsCard';
 import ThemeToggle from './ThemeToggle';
+import Search from './Search'; // Imports the new Search component.
 
+// Defines the main application component.
 function App() {
-  // State to manage the current theme ('light' or 'dark')
-  const [theme, setTheme] = useState('light'); // Default to light theme
+  // --- State Management ---
 
-  // Function to toggle the theme
+  // State hook to manage the current theme ('light' or 'dark').
+  const [theme, setTheme] = useState('light');
+  // State hook to store the list of locations fetched from the backend.
+  const [locations, setLocations] = useState([]);
+  // 'city' is the single source of truth for the location, controlled by the Search component.
+  const [city, setCity] = useState('Dhaka');
+  // 'mapCenter' is updated by the WeatherWidget after it fetches data.
+  const [mapCenter, setMapCenter] = useState([23.8103, 90.4125]); // Default to Dhaka.
+
+  // --- Functions ---
+
+  // Function to toggle the theme between 'light' and 'dark'.
   const toggleTheme = () => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
   };
 
-  // Effect to add/remove the theme class on the body element
-  useEffect(() => {
-    document.body.className = ''; // Clear existing classes first
-    document.body.classList.add(theme + '-theme'); // Add 'light-theme' or 'dark-theme'
-  }, [theme]); // Run this effect whenever the theme state changes
+  // --- Effects ---
 
-  // Sample forecast data (kept in App.js for now)
+  // Effect hook to apply the current theme's class to the <body> element.
+  // This runs every time the 'theme' state variable changes.
+  useEffect(() => {
+    document.body.className = ''; // Clears any existing theme classes.
+    document.body.classList.add(theme + '-theme'); // Adds the current theme class (e.g., 'dark-theme').
+  }, [theme]);
+
+  // Effect hook to fetch locations from the backend API when the app first loads.
+  useEffect(() => {
+    // Defines an asynchronous function to get the data.
+    const fetchLocations = async () => {
+      try {
+        // Makes a GET request to the backend's /api/locations endpoint.
+        const response = await axios.get('http://127.0.0.1:8000/api/locations');
+        // Saves the list of locations from the response into the 'locations' state.
+        setLocations(response.data);
+      } catch (error) {
+        // Logs an error to the console if the API call fails.
+        console.error("Failed to fetch locations:", error);
+      }
+    };
+
+    // Calls the fetch function.
+    fetchLocations();
+  }, []); // The empty array [] dependency means this effect runs only once.
+
+  // --- Mock Data (for components not yet connected to the backend) ---
+
+  // Sample data for the forecast table.
   const forecastData = [
     { time: "16:00", level: 2.8, risk: "Low" },
     { time: "19:00", level: 3.1, risk: "Medium" },
@@ -40,50 +77,59 @@ function App() {
     { time: "13:00", level: 2.5, risk: "Low" }
   ];
 
-  // Sample summary data
+  // Sample data for the summary card.
   const summaryData = {
-    currentRisk: "Medium", // This will control the SafetyRecommendationsCard
+    currentRisk: "Medium", // This value also controls the SafetyRecommendationsCard.
     peakLevel: 3.4,
     lastUpdated: "28/10/2025, 23:12 GMT"
   };
 
+  // Returns the JSX structure for the entire application.
   return (
-    // Uses a React Fragment (<>) to group the components
+    // Uses a React Fragment (<>) to group all components.
     <>
-      {/* Theme toggle can stay here or be moved into the Header component later */}
+      {/* Renders the theme toggle switch, passing the current theme and toggle function. */}
       <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
 
+      {/* Renders the Header component. */}
       <Header />
 
-      {/* Main container for the dashboard content */}
+      {/* Main container for the dashboard content. */}
       <div className="container">
-        {/* The 'main' element uses the CSS grid defined in App.css */}
-        <main>
-          {/* Row 1: Map and Weather side-by-side */}
-          {/* Assuming MapCard needs 2/3 width and Weather 1/3, adjust grid/CSS if needed */}
-          <MapCard theme={theme} /> {/* Pass theme for map style */}
-          <WeatherWidget />
+        
+        {/* Renders the global search bar at the top of the content area. */}
+        {/* Passes the 'setCity' function so the search bar can update the app's state. */}
+        <Search initialCity={city} onCityChange={setCity} />
 
-          {/* Row 2: Summary and Safety side-by-side */}
-          <SummaryCard data={summaryData} /> {/* Pass summary data */}
-          <SafetyRecommendationsCard currentRisk={summaryData.currentRisk} /> {/* Pass risk level */}
+        {/* The 'main' element uses the CSS grid defined in App.css. */}
+        <main>
+          {/* Row 1: Map (left) and Weather (right) */}
+          {/* Renders the MapCard, passing the theme, fetched locations, and map center. */}
+          <MapCard theme={theme} locations={locations} mapCenter={mapCenter} />
+          {/* Renders the WeatherWidget, passing the city and handler functions. */}
+          <WeatherWidget city={city} onCoordsChange={setMapCenter} />
+
+          {/* Row 2: Summary (left) and Safety (right) */}
+          {/* Renders the SummaryCard, passing the mock summary data. */}
+          <SummaryCard data={summaryData} />
+          {/* Renders the SafetyCard, passing the current risk from the summary data. */}
+          <SafetyRecommendationsCard currentRisk={summaryData.currentRisk} />
 
           {/* Row 3: Forecast Table (spans full width via CSS) */}
+          {/* Renders the ForecastTable, passing the mock forecast data. */}
           <ForecastTable forecastData={forecastData} />
 
-          {/* Row 4: Alert Subscription (spans full width via CSS, if needed) */}
+          {/* Row 4: Alert Subscription (spans full width via CSS) */}
+          {/* Renders the AlertSubscriptionCard. */}
           <AlertSubscriptionCard />
-
-          {/* Insights Card is commented out */}
-          {/* <InsightsCard /> */}
-
         </main>
       </div>
 
+      {/* Renders the Footer component. */}
       <Footer />
     </>
   );
 }
 
-// Exports the App component to be used in index.js
+// Exports the App component to be used by index.js.
 export default App;

@@ -1,23 +1,53 @@
-import React, { useState } from 'react'; // Imports React and the useState hook for managing component state.
+import React, { useState } from 'react';
+import axios from 'axios'; // Used for making the HTTP request
 
 // Defines the AlertSubscriptionCard component.
-// This component provides a simple form for users to subscribe to email alerts.
 function AlertSubscriptionCard() {
-  // State hook to manage the value of the email input field. Initialized to an empty string.
+  // State to hold the email address entered by the user.
   const [email, setEmail] = useState('');
+  // State to show a success or error message to the user after submission.
+  const [message, setMessage] = useState('');
+  // State to disable the button while the request is in progress.
+  const [loading, setLoading] = useState(false);
 
   // Handles the form submission event.
-  const handleSubmit = (event) => {
-    // Prevents the default browser behavior of reloading the page on form submission.
+  const handleSubmit = async (event) => {
+    // Prevents the default browser behavior of reloading the page.
     event.preventDefault();
-    // Logs the entered email to the console for debugging purposes.
-    console.log("Subscribing email:", email);
-    // Placeholder for future logic to send the email address to the backend API.
-    // TODO: Implement API call to backend subscription endpoint.
-    // Provides simple feedback to the user that the request was received (for now).
-    alert(`Subscription request for ${email} received! (Backend not connected yet)`);
-    // Clears the email input field after submission by resetting the state.
-    setEmail('');
+    
+    // Disables the form button to prevent multiple clicks.
+    setLoading(true);
+    // Clears any previous messages.
+    setMessage('');
+
+    // Defines the data to be sent to the backend.
+    const subscriptionData = {
+      email: email,
+      location_id: 1 // TODO: Hard-coded location 1 (e.g., Dhaka) for now.
+                      // Later, this should be passed in as a prop.
+    };
+
+    try {
+      // Makes the POST request to the backend API endpoint.
+      const response = await axios.post('http://127.0.0.1:8000/api/subscribe', subscriptionData);
+
+      // Handles a successful response from the backend.
+      setMessage(response.data.message); // Shows success message from the API.
+      setLoading(false); // Re-enables the button.
+      setEmail(''); // Clears the input field.
+
+    } catch (error) {
+      // Handles an error from the backend.
+      console.error("Subscription failed:", error);
+      if (error.response) {
+        // Sets the error message from the API response (e.g., "Location not found").
+        setMessage(`Error: ${error.response.data.detail}`);
+      } else {
+        // Sets a generic error message if the server can't be reached.
+        setMessage('Error: Could not connect to the server.');
+      }
+      setLoading(false); // Re-enables the button.
+    }
   };
 
   // Returns the JSX structure for the subscription card.
@@ -26,29 +56,37 @@ function AlertSubscriptionCard() {
     <div className="card" id="alert-subscription">
       <h2>Get Flood Alerts</h2>
       <p>Enter your email to receive alerts for the current location.</p>
-      {/* The form element triggers the handleSubmit function upon submission. */}
-      {/* Inline styles are used for basic layout (flexbox) and spacing. */}
+      
+      {/* The form element triggers the handleSubmit function. */}
       <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-        {/* Email input field. */}
         <input
-          type="email" // Specifies the input type for email validation.
-          value={email} // Binds the input's value to the 'email' state variable.
-          // Updates the 'email' state whenever the input value changes.
+          type="email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your email address"
-          required // Makes this field mandatory for form submission.
-          // Basic inline styles for the input field.
+          required // Makes this field mandatory.
+          disabled={loading} // Disables input while loading.
           style={{ flexGrow: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
         />
-        {/* Submit button for the form. */}
         <button
           type="submit"
-          // Basic inline styles using CSS variables for theme consistency.
-          style={{ padding: '10px 15px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--primary-accent)', color: 'white', cursor: 'pointer' }}
+          disabled={loading} // Disables button while loading.
+          style={{
+            padding: '10px 15px',
+            borderRadius: '4px',
+            border: 'none',
+            backgroundColor: 'var(--primary-accent)',
+            color: 'white',
+            cursor: 'pointer',
+            opacity: loading ? 0.7 : 1 // Dims the button when disabled.
+          }}
         >
-          Subscribe
+          {loading ? 'Subscribing...' : 'Subscribe'}
         </button>
       </form>
+
+      {/* Displays the success or error message to the user. */}
+      {message && <p style={{ marginTop: '15px', color: message.startsWith('Error') ? 'var(--risk-high)' : 'var(--risk-low)' }}>{message}</p>}
     </div>
   );
 }
