@@ -15,7 +15,11 @@ function SafetyRecommendationsCard({ currentRisk = 'Low' }) { // Default to 'Low
       recommendations = (
         <>
           <p><strong>Immediate Danger!</strong> Follow evacuation orders immediately.</p>
-          <p>Move to higher ground. Avoid walking or driving through floodwaters.</p>
+          <p><strong>HAZARD:</strong>Life-threatening flash flood caused by heavy rain.</p>
+          <p><strong>IMPACT:</strong>Rapid rise in water level, flooding of urban areas, damage to infrastructure.</p>
+          <p><strong>What to do:</strong>Immediately seek higher ground. Avoid floodwaters whether on foot or in a vehicle.</p>
+          <p>In a building, move to the highest floor but avoid the attic. If caught in water, stay calm, position yourself with your feet facing downstream.</p>
+          <p><strong>DO NOT DELAY</strong></p>
           <p>Listen to local emergency broadcasts.</p>
         </>
       );
@@ -27,8 +31,10 @@ function SafetyRecommendationsCard({ currentRisk = 'Low' }) { // Default to 'Low
       recommendations = (
         <>
           <p><strong>Be Prepared!</strong> Monitor conditions closely.</p>
-          <p>Prepare an emergency kit with essentials (water, food, first aid).</p>
-          <p>Secure outdoor items and consider moving valuables to higher floors.</p>
+          <p>Prepare an emergency kit with essentials (clean water, food, first aid).</p>
+          <p>Secure outdoor items and consider moving yourself, and valuables, to higher floors if weather worsens.</p>
+          <p>Prepare your home by knowing how to shut off utilities, especially electricity, and install flood protection equipment.</p>
+          <p>Listen out for changes in forecast on weather broadcasts.</p>
         </>
       );
       // Applies a specific left border color using a CSS variable for Medium risk.
