@@ -6,9 +6,9 @@ function SummaryCard({ data }) {
 
   // Helper function to determine the CSS class based on the risk value for styling.
   const getRiskClass = (risk) => {
-    if (risk === 'Low') return 'risk-low';
-    if (risk === 'Medium') return 'risk-medium';
-    if (risk === 'High') return 'risk-high';
+    if (risk === 'low') return 'risk-low';
+    if (risk === 'medium') return 'risk-medium';
+    if (risk === 'high') return 'risk-high';
     return ''; // Returns empty string if risk level is unknown or not provided.
   };
 
@@ -25,7 +25,7 @@ function SummaryCard({ data }) {
       {/* Section to display the current risk level. */}
       <div className="summary-item">
         <span>Current Risk Level:</span>
-        {/* Displays the currentRisk value from props and applies the corresponding CSS class. */}
+        {/* Displays the currentRisk and applies the correct color class. */}
         <strong className={getRiskClass(currentRisk)}>{currentRisk}</strong>
       </div>
       {/* Section to display the peak water level. */}

@@ -1,6 +1,6 @@
 import React from 'react';
 // Imports the ThemeToggle component to be rendered inside the header.
-import ThemeToggle from './ThemeToggle';
+import ThemeToggle from '../UI/ThemeToggle';
 
 // Defines the Header component for the dashboard.
 // It accepts 'theme' and 'toggleTheme' as props from App.js.
