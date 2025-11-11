@@ -18,6 +18,8 @@ class Location(database.Base):
     name = Column(String, unique=True, index=True)
     latitude = Column(Float)
     longitude = Column(Float)
+    
+    danger_threshold = Column(Float, nullable=True) # Storing the m3/s value
 
     # Sets up the link to the other tables.
     predictions = relationship("Prediction", back_populates="location")

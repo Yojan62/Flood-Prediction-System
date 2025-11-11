@@ -1,0 +1,25 @@
+{
+  "features": [
+    "discharge_m3_s",
+    "dis_lag1",
+    "dis_lag2",
+    "dis_lag3",
+    "dis_rate",
+    "rain_lag_1",
+    "rain_lag_2",
+    "rain_lag_3",
+    "rain_lag_7",
+    "rain_roll_3",
+    "rain_roll_7",
+    "api",
+    "rain_forecast_Nd",
+    "rain_x_soil",
+    "max_hourly_rain_mm",
+    "soil_moisture",
+    "evapotranspiration",
+    "temperature",
+    "month_sin",
+    "month_cos"
+  ],
+  "lead_days": 1
+}

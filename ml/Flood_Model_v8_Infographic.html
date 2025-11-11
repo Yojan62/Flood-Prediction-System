@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flood Forecasting Model v8: Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+    
+    <header class="bg-[#004080] text-white p-8 rounded-b-xl shadow-lg">
+        <div class="container mx-auto max-w-5xl">
+            <h1 class="text-4xl font-bold">Flood Forecasting Model v8: Analysis</h1>
+            <p class="text-xl text-[#99CCFF] mt-2">A deep dive into its predictive performance.</p>
+        </div>
+    </header>
+
+    
+    <main class="container mx-auto max-w-5xl p-4 md:p-8">
+
+        
+        <section class="mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <div class="md:col-span-2 bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-[#004080] mb-4">Overall Model Performance</h2>
+                    <p class="text-gray-600 mb-4">The model is exceptionally accurate at predicting general, day-to-day river flow. It successfully explains over 95% of the total variance in the dataset, demonstrating a strong grasp of the normal hydrological cycle.</p>
+                    <div class="chart-container h-80 max-h-[350px]">
+                        <canvas id="overallR2Chart"></canvas>
+                    </div>
+                </div>
+
+                
+                <div class="space-y-6">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-500">Overall R2 Score</h3>
+                        <p class="text-5xl font-bold text-[#0073E6]">0.954</p>
+                        <p class="text-gray-600">of variance explained.</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-lg font-semibold text-gray-500">Mean Absolute Error (MAE)</h3>
+                        <p class="text-5xl font-bold text-[#0073E6]">2.26 m³/s</p>
+                        <p class="text-gray-600">average prediction error.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <section class="mb-8 bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-center text-[#004080] mb-6">How the Model Works: Data to Prediction</h2>
+            <p class="text-gray-600 text-center max-w-2xl mx-auto mb-6">The model's success comes from a multi-stage process: acquiring two separate data sources, aggregating them into daily records, and then building 20 advanced features for the model to train on.</p>
+            
+            <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 text-center">
+                <div class="p-4 bg-blue-100 rounded-lg shadow w-full md:w-1/4">
+                    <div class="text-2xl mb-2">①</div>
+                    <h3 class="text-lg font-semibold text-[#0059B3]">Acquire Data</h3>
+                    <p class="text-sm text-gray-700">Fetch daily river discharge and hourly weather data.</p>
+                </div>
+                <div class="text-2xl font-bold text-gray-400">→</div>
+                <div class="p-4 bg-blue-100 rounded-lg shadow w-full md:w-1/4">
+                    <div class="text-2xl mb-2">②</div>
+                    <h3 class="text-lg font-semibold text-[#0059B3]">Aggregate & Merge</h3>
+                    <p class="text-sm text-gray-700">Resample hourly weather (sum rain, avg temp) and merge with discharge data.</p>
+                </div>
+                <div class="text-2xl font-bold text-gray-400">→</div>
+                <div class="p-4 bg-blue-100 rounded-lg shadow w-full md:w-1/4">
+                    <div class="text-2xl mb-2">③</div>
+                    <h3 class="text-lg font-semibold text-[#0059B3]">Engineer Features</h3>
+                    <p class="text-sm text-gray-700">Build 20 "clues" like rolling averages, soil interaction, and rain forecast.</p>
+                </div>
+                <div class="text-2xl font-bold text-gray-400">→</div>
+                <div class="p-4 bg-green-100 rounded-lg shadow w-full md:w-1/4">
+                    <div class="text-2xl mb-2">④</div>
+                    <h3 class="text-lg font-semibold text-green-700">Train Model</h3>
+                    <p class="text-sm text-gray-700">Train a Random Forest on the 20 features to predict the next day's discharge.</p>
+                </div>
+            </div>
+        </section>
+
+        
+        <section class="mb-8 bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-center text-[#004080] mb-6">The 20 "Clues" the Model Uses (Feature Groups)</h2>
+            <p class="text-gray-600 text-center max-w-2xl mx-auto mb-6">The model doesn't just look at rainfall. It analyzes 20 distinct features grouped into 7 categories, covering the entire hydrological system.</p>
+            <div class="chart-container h-96 max-h-[450px]">
+                <canvas id="featureCategoriesChart"></canvas>
+            </div>
+        </section>
+
+        
+        <section class="mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="bg-white rounded-xl shadow-lg p-6 border-t-8 border-red-500">
+                    <h2 class="text-2xl font-bold text-red-700 mb-4">The Critical Issue: Peak Flood Failure</h2>
+                    <p class="text-gray-600 mb-4">Despite its high overall score, the model **fails** at its most important job: predicting extreme flood peaks. The R2 score for the top 10% of flood events is negative, meaning the model is consistently and dangerously **under-predicting** the severity of major floods.</p>
+                    <div class="bg-red-100 rounded-lg p-4 text-center">
+                        <h3 class="text-lg font-semibold text-gray-500">Peak R2 Score (Floods)</h3>
+                        <p class="text-6xl font-bold text-red-600">-0.324</p>
+                        <p class="text-red-700 font-semibold">Worse than just guessing the average.</p>
+                    </div>
+                </div>
+
+                
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-bold text-[#004080] mb-4">Visualizing the Failure</h2>
+                    <p class="text-gray-600 mb-4">This chart shows a hypothetical flood. The actual river level (blue) spikes dramatically, but the model's prediction (red) fails to see the danger, only predicting a minor increase.</p>
+                    <div class="chart-container h-80 max-h-[350px]">
+                        <canvas id="peakFailureChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+        <section class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-center text-[#004080] mb-6">Conclusion & Future Work</h2>
+            <p class="text-gray-600 text-center max-w-2xl mx-auto">
+                The model is a powerful tool for predicting general flow but is **not suitable for real-world flood alerts** due to its failure at predicting peaks.
+                This critical issue is caused by **missing upstream data**: the model can't see a "wave" of water coming from a dam or snowmelt until it's too late.
+                Future work must focus on integrating new data sources, such as upstream river gauges, to give the model the "eyes" it needs to see large-scale flood events coming.
+            </p>
+        </section>
+
+    </main>
+
+    <script>
+        
+        const tooltipCallback = {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            const item = tooltipItems[0];
+                            let label = item.chart.data.labels[item.dataIndex];
+                            if (Array.isArray(label)) {
+                                return label.join(' ');
+                            } else {
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        
+        const overallR2Ctx = document.getElementById('overallR2Chart').getContext('2d');
+        new Chart(overallR2Ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Explained Variance (95.4%)', 'Unexplained Variance (4.6%)'],
+                datasets: [{
+                    data: [95.4, 4.6],
+                    backgroundColor: [
+                        '#0073E6', 
+                        '#99CCFF'  
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    ...tooltipCallback.plugins,
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Overall R2 Score (Goodness of Fit)',
+                        font: {
+                            size: 16
+                        },
+                        color: '#333'
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+
+        
+        const featureCategoriesCtx = document.getElementById('featureCategoriesChart').getContext('2d');
+        new Chart(featureCategoriesCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Hydrological State', 'Trend & Momentum', ['Atmospheric', 'Inputs (Past & Future)'], 'Accumulated Wetness', 'Ground & Climate', 'Cyclical Context', 'Interaction'],
+                datasets: [{
+                    label: 'Number of Features',
+                    data: [4, 3, 3, 1, 3, 2, 1],
+                    backgroundColor: '#0059B3',
+                    borderColor: '#004080',
+                    borderWidth: 2,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: {
+                            display: false
+                        }
+                    },
+                    y: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                },
+                plugins: {
+                    ...tooltipCallback.plugins,
+                    legend: {
+                        display: false
+                    },
+                    title: {
+                        display: true,
+                        text: 'Feature Count by Category',
+                        font: {
+                            size: 16
+                        },
+                        color: '#333'
+                    }
+                }
+            }
+        });
+
+        
+        const peakFailureCtx = document.getElementById('peakFailureChart').getContext('2d');
+        new Chart(peakFailureCtx, {
+            type: 'line',
+            data: {
+                labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4 (Peak)', 'Day 5', 'Day 6', 'Day 7'],
+                datasets: [{
+                    label: 'Actual Discharge (m³/s)',
+                    data: [10, 12, 15, 65, 30, 20, 18],
+                    borderColor: '#0073E6',
+                    backgroundColor: 'rgba(0, 115, 230, 0.1)',
+                    fill: true,
+                    tension: 0.3
+                }, {
+                    label: 'Predicted Discharge (m³/s)',
+                    data: [10, 12, 16, 45, 28, 20, 18],
+                    borderColor: '#E60000',
+                    backgroundColor: 'rgba(230, 0, 0, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    borderDash: [5, 5]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    ...tooltipCallback.plugins,
+                    legend: {
+                        position: 'bottom',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Hypothetical Peak Failure (R2 < 0)',
+                        font: {
+                            size: 16
+                        },
+                        color: '#333'
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

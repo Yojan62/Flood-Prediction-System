@@ -1,0 +1,28 @@
+{
+  "features": [
+    "discharge_m3_s",
+    "discharge_lag_1",
+    "discharge_lag_2",
+    "discharge_rate_change",
+    "discharge_3_day_avg",
+    "rainfall_lag_1",
+    "rainfall_3_day_sum",
+    "rainfall_7_day_sum",
+    "rainfall_14_day_sum",
+    "rainfall_30_day_sum",
+    "rainfall_7_day_avg",
+    "rainfall_forecast_Nd",
+    "ari_7_d0.7",
+    "ari_14_d0.85",
+    "ari_30_d0.9",
+    "max_hourly_rain_mm",
+    "rain_x_soil",
+    "local_vs_upstream",
+    "soil_moisture",
+    "evapotranspiration",
+    "temperature",
+    "month_sin",
+    "month_cos"
+  ],
+  "lead_days": 1
+}

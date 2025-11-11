@@ -17,7 +17,10 @@ import models
 
 # This line tells SQLAlchemy to create any missing tables.
 # It should be commented out.
-# models.database.Base.metadata.create_all(bind=database.engine)
+#print("--- WARNING: DROPPING AND RECREATING ALL TABLES ---")
+#models.database.Base.metadata.drop_all(bind=database.engine)
+#models.database.Base.metadata.create_all(bind=database.engine)
+#print("--- TABLES RECREATED SUCCESSFULLY ---")
 
 
 # --- Pydantic Schemas ---

@@ -1,0 +1,34 @@
+{
+  "features": [
+    "discharge_m3_s",
+    "dis_lag1",
+    "dis_lag2",
+    "dis_lag3",
+    "dis_rate",
+    "rain_lag_1",
+    "rain_lag_2",
+    "rain_lag_3",
+    "rain_lag_7",
+    "rain_lag_14",
+    "rain_roll_3",
+    "rain_roll_7",
+    "rain_roll_14",
+    "api",
+    "rainfall_forecast_1d",
+    "max_hourly_rain_mm",
+    "evapotranspiration",
+    "et_lag_1",
+    "temperature",
+    "month_sin",
+    "month_cos",
+    "rain_grad_1_2"
+  ],
+  "seq_features": [
+    "discharge_m3_s",
+    "dis_rate",
+    "rain_roll_3",
+    "rain_roll_7",
+    "api"
+  ],
+  "lead_days": 1
+}
