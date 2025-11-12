@@ -1,55 +1,62 @@
-/* Styling for the theme toggle switch container. */
 .theme-toggle-switch {
-  cursor: pointer; /* Changes cursor to a pointer on hover. */
-  background-color: #ccc; /* Sets the default background of the switch track (light theme). */
-  border: none; /* Removes any default border. */
-  border-radius: 30px; /* Creates fully rounded ends for the track. */
-  padding: 3px; /* Adds space between the track edge and the inner circle. */
-  width: 50px; /* Sets the total width of the switch. */
-  height: 26px; /* Sets the total height of the switch. */
-  display: flex; /* Uses flexbox to align the inner circle. */
-  align-items: center; /* Vertically centers the inner circle. */
-  transition: background-color 0.3s ease; /* Adds a smooth transition for the background color change. */
-  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height. */
-  position: absolute; /* Positions the switch absolutely within its parent container. */
-  top: 50%; /* Center it vertically in the parent container */
-  right: 20px; /* Place it 20px from the right edge */
-  transform: translateY(-50%); /* Vertically centers the switch in its container. */
-  z-index: 1000; /* Ensures the switch appears above other elements. */
+  /* Basic Button Reset */
+  background-color: var(--table-row-hover);
+  border: 1px solid var(--table-row-hover);
+  border-radius: 99rem; /* Pill shape */
+  cursor: pointer;
+  padding: 0.4rem; /* 4px */
+  
+  /* Sizing in rem */
+  width: 5.0rem;  /* 50px */
+  height: 2.6rem; /* 26px */
+  
+  /* Positioning */
+  position: relative; /* Let the header's flexbox position this */
+  display: flex;
+  align-items: center;
+  
+  /* Smooth transition for the circle */
+  transition: background-color 0.15s ease;
 }
 
-/* Styling for the sliding circle (the 'thumb') inside the switch. */
+body.dark-theme .theme-toggle-switch {
+  background-color: var(--primary-accent);
+  border-color: var(--primary-accent);
+}
+
 .slider-circle {
-  background-color: white; /* Sets the circle's background color. */
-  border-radius: 50%; /* Makes the element a perfect circle. */
-  width: 20px; /* Sets the diameter of the circle. */
-  height: 20px; /* Sets the diameter of the circle. */
-  display: flex; /* Uses flexbox to center the icon inside. */
-  align-items: center; /* Vertically centers the icon. */
-  justify-content: center; /* Horizontally centers the icon. */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow effect. */
-  /* Adds a smooth sliding animation when the circle moves. */
-  transition: transform 0.3s ease;
-  transform: translateX(0px); /* Sets the initial position (left side). */
+  background-color: #fff;
+  border-radius: 50%;
+  
+  /* Sizing in rem */
+  height: 2.0rem; /* 20px */
+  width: 2.0rem;  /* 20px */
+  
+  /* Positioning the circle */
+  position: absolute;
+  top: 0.3rem;  /* 3px */
+  left: 0.4rem; /* 4px */
+  
+  /* Transition for the slide */
+  transition: transform 0.15s ease;
+  
+  /* Center the icon inside */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Styles applied to the switch track when the theme is dark. */
-.theme-toggle-switch.dark {
-  background-color: var(--primary-accent); /* Changes track background to the dark theme's accent color. */
+/* This is the "slide" animation */
+body.dark-theme .slider-circle {
+  transform: translateX(2.3rem); /* 23px */
 }
 
-/* Styles applied to the sliding circle when the theme is dark. */
-.theme-toggle-switch.dark .slider-circle {
-  /* Moves the circle to the right side of the track using transform. */
-  /* Calculation: Track width (50px) - Circle width (20px) - Left padding (3px) - Right padding (3px) = 24px */
-  transform: translateX(24px);
+/* Icon colors */
+.icon-light {
+  color: #f39c12; /* Sun color */
+  font-size: 1.4rem; /* 14px */
 }
-
-/* Styles for the sun icon (used in dark mode). */
-.slider-circle .icon-light {
-  color: #f39c12; /* Sets the sun icon's color. */
-}
-/* Styles for the moon icon (used in light mode). */
-.slider-circle .icon-dark {
-  color: #4a4a4a; /* Sets the moon icon's color. */
+.icon-dark {
+  color: #4a4a4a; /* Moon color */
+  font-size: 1.4rem; /* 14px */
 }

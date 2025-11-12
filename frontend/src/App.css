@@ -1,245 +1,247 @@
+/* --- 1. The 1rem = 10px "Trick" --- */
+/*
+ * We set the base font-size to 62.5%
+ * (16px browser default * 0.625 = 10px)
+ * This makes 1rem = 10px.
+ * Now, 14px = 1.4rem, 20px = 2.0rem, etc. Easy!
+*/
+html {
+  font-size: 62.5%;
+}
+
 /* --- Light Theme Variables (Default) --- */
-/* Defines the CSS variables used for the light theme. */
 :root {
-  --background-color: #F8F9FA; /* Sets the overall page background color. */
-  --text-color: #343A40; /* Sets the default text color. */
-  --card-background: #FFFFFF; /* Sets the background color for card elements. */
-  --primary-accent: #556B2F; /* Sets the main accent color (e.g., for headings). Muted Green */
-  --risk-low: #28A745; /* Sets the color for 'Low' risk indicators. */
-  --risk-medium: #FFC107; /* Sets the color for 'Medium' risk indicators. */
-  --risk-high: #DC3545; /* Sets the color for 'High' risk indicators. */
-  --card-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Defines the shadow effect for cards. */
-  --table-row-even-background: #f8f9fa; /* Background for even table rows in light mode. */
-  --table-row-hover: #e9ecef; /* Background for table rows on hover in light mode. */
+  --background-color: #F8F9FA;
+  --text-color: #343A40;
+  --card-background: #FFFFFF;
+  --primary-accent: #556B2F; /* Muted Green */
+  --risk-low-bg: #e3fcec;
+  --risk-low-text: #1d9a5b;
+  --risk-medium-bg: #fff8e1;
+  --risk-medium-text: #ffa000;
+  --risk-high-bg: #ffebee;
+  --risk-high-text: #d32f2f;
+  --card-shadow: 0 1.0rem 3.0rem rgba(0, 0, 0, 0.07); /* 10px 30px */
+  --table-row-even-background: #f8f9fa;
+  --table-row-hover: #e9ecef;
+  --backdrop-filter: none;
 }
 
 /* --- Dark Theme Variables --- */
-/* Overrides the :root variables when the body has the 'dark-theme' class. */
 body.dark-theme {
-  --background-color: #1A1A1A; /* Dark page background. */
-  --text-color: #E0E0E0; /* Light text color for contrast. */
-  --card-background: #2C2C2C; /* Darker card background. */
-  --primary-accent: #00BFFF; /* Bright accent color. Electric Blue */
-  --risk-low: #39FF14;      /* Bright risk color. Neon Green */
-  --risk-medium: #FFFF00;   /* Bright risk color. Bright Yellow */
-  --risk-high: #FF1F1F;      /* Bright risk color. Bright Red */
-  --card-shadow: 0 4px 12px rgba(0, 191, 255, 0.1); /* Adds a subtle blue glow effect. */
-  --table-row-even-background: #3a3a3a; /* Defines a specific background for even table rows in dark mode. */
-  --table-row-hover: #4a4a4a; /* Background for table rows on hover in dark mode. */
+  --background-color: #1A1A1A;
+  --text-color: #E0E0E0;
+  
+  /* --- Solid Background (No Transparency) --- */
+  --card-background: #2C2C2C; /* Solid dark gray */
+  --backdrop-filter: none;     /* Disables blur */
+  
+  --primary-accent: #00BFFF; /* Electric Blue */
+  --risk-low-bg: #1d9a5b;
+  --risk-low-text: #ffffff;
+  --risk-medium-bg: #ffa000;
+  --risk-medium-text: #ffffff;
+  --risk-high-bg: #d32f2f;
+  --risk-high-text: #ffffff;
+  --card-shadow: 0 0.4rem 1.2rem rgba(0, 191, 255, 0.1); /* 4px 12px */
+  --table-row-even-background: #3a3a3a;
+  --table-row-hover: #4a4a4a;
 }
 
-/* --- Custom Leaflet Popup Styles --- */
-
-/* Base style for the popup container. */
-.custom-popup .leaflet-popup-content-wrapper {
-  background-color: var(--card-background); /* Uses the theme's card background. */
-  color: var(--text-color); /* Uses the theme's text color. */
-  border-radius: 8px; /* Rounds the corners. */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Adds a standard shadow. */
-  border: 1px solid var(--primary-accent); /* Optional border using the theme's accent color. */
-}
-
-/* Styles the small arrow (tip) of the popup. */
-.custom-popup .leaflet-popup-tip {
-  background-color: var(--card-background); /* Matches the popup background color. */
-}
-
-/* Styles the content text inside the popup. */
-.custom-popup .leaflet-popup-content {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Standard system font stack. */
-  font-size: 14px; /* Sets the font size. */
-  line-height: 1.5; /* Sets the line spacing. */
-  margin: 10px 15px; /* Adds padding inside the popup. */
-}
-
-/* Styles the container for the emoji marker (removes default Leaflet background/border). */
-.leaflet-emoji-icon {
-    background: none;
-    border: none;
-}
-
-/* --- General Styles --- */
-
-/* Applies base styles to the entire page body using CSS variables. */
+/* --- 2. General Styles (using 'rem') --- */
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Sets the default font. */
-  line-height: 1.6; /* Sets default line spacing. */
-  margin: 0; /* Removes default browser margin. */
-  padding: 0; /* Removes default browser padding. */
-  background-color: var(--background-color); /* Applies the theme's background color. */
-  color: var(--text-color); /* Applies the theme's text color. */
-  /* Adds a smooth transition effect when theme colors change. */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.15s ease, color 0.15s ease;
+  
+  /* --- Fluid Typography --- */
+  font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.6rem);
 }
 
-/* Styles the main content container, centering it and setting a max width. */
 .container {
-  max-width: 1200px; /* Limits the maximum width of the content area. */
-  margin: 0 auto; /* Centers the container horizontally. */
-  padding: 20px; /* Adds padding around the content. */
+  max-width: 140rem; /* 1400px */
+  margin: 0 auto;
+  padding: 2.0rem; /* 20px */
 }
 
-/* --- Main Content Grid --- */
-/* Sets up the main content area using a CSS grid. */
+header {
+  padding: 2.5rem 3.0rem; /* 25px 30px */
+  margin-bottom: 3.0rem; /* 30px */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  background-color: var(--card-background); /* Use the card's background */
+  box-shadow: var(--card-shadow);           /* Use the card's shadow */
+  border-radius: 1.2rem; /* 12px (match your cards) */
+  transition: background-color 0.15s ease, box-shadow 0.15s ease; /* Add transition for theme change */
+}
+
+header h1 {
+  margin: 0;
+  color: var(--text-color); /* Use the standard text color */
+  font-size: clamp(1.8rem, 1.5rem + 1vw, 2.4rem);
+  transition: color 0.15s ease;
+}
+
+/* Update dark theme header to use its own darker color */
+body.dark-theme header {
+  background-color: #2C2C2C; /* Same as dark card background */
+  box-shadow: var(--card-shadow); /* Apply shadow */
+}
+
+body.dark-theme header h1 {
+  color: var(--text-color); /* Dark theme text color */
+}
+
+/* --- Card (using 'rem') --- */
+.card {
+  background-color: var(--card-background);
+  box-shadow: var(--card-shadow);
+  border-radius: 1.2rem; /* 12px */
+  padding: 2.5rem; /* 25px */
+  border: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card h2 {
+  font-size: 1.8rem;  /* 18px - much more readable */
+  color: var(--text-color); /* Use the main text color */
+  text-transform: none; /* Not uppercase */
+  letter-spacing: 0;    /* Normal spacing */
+  margin-top: 0;
+  margin-bottom: 1.5rem; /* 15px */
+  padding-bottom: 1.5rem; /* 15px */
+  border-bottom: 1px solid #eee; 
+}
+
+body.dark-theme .card h2 {
+  color: var(--text-color); /* Use the main text color */
+  border-bottom-color: #444;
+}
+
+/* --- Main 2-Column Grid (NEW LAYOUT) --- */
 main {
   display: grid;
-  /* Defines two columns: the first is 2 parts wide, the second is 1 part wide. */
-  grid-template-columns: 2fr 1fr;
-  grid-gap: 30px; /* Sets the space between grid items. */
+  grid-template-columns: 2fr 1fr; 
+  grid-auto-rows: auto;
+  grid-gap: 3.0rem; /* 30px */
 }
 
-/* --- Component Styles --- */
+/* --- Grid Placement (NEW LAYOUT) --- */
+#search-bar { grid-column: 1 / -1; }
+#map-card { grid-column: 1 / 2; grid-row: 2; }
+#summary-weather-card-new { grid-column: 2 / 3; grid-row: 2; padding: 0; overflow: hidden; }
+#forecast-table-container { grid-column: 1 / -1; grid-row: 3; }
+#safety-recommendations { grid-column: 1 / 2; grid-row: 4; }
+#alert-subscription { grid-column: 2 / 3; grid-row: 4; }
 
-/* Styles the header section. */
-header {
-  background-color: var(--card-background); /* Uses the theme's card background color. */
-  padding: 20px; /* Adds padding inside the header. */
-  border-bottom: 2px solid #e0e0e0; /* Adds a bottom border (consider using a variable). */
-  text-align: center; /* Centers the header content. */
-  margin-bottom: 30px; /* Adds space below the header. */
-  transition: background-color 0.3s ease; /* Smooth transition for theme change. */
-
-  display: flex; /* Uses flexbox for layout. */
-  align-items: center; /* Vertically centers items. */
-  justify-content: center; /* Horizontally centers items. */
-  position: relative; /* Allows absolute positioning of child elements. */
+/* --- Map & Leaflet (using 'vh' and 'rem') --- */
+#map-card .leaflet-container {
+  width: 100%;
+  height: 60vh; 
+  border-radius: 0.8rem; /* 8px */
 }
+.leaflet-emoji-icon { background: none; border: none; }
+.leaflet-emoji-icon-selected span { text-shadow: 0 0 0.8rem var(--risk-high-text), 0 0 1.2rem var(--risk-high-text); }
 
-/* Styles the main heading within the header. */
-header h1 {
-  margin: 0; /* Removes default margin. */
-  color: var(--primary-accent); /* Uses the theme's accent color. */
-  font-size: 2em; /* Sets the font size. */
-  transition: color 0.3s ease; /* Smooth transition for theme change. */
+/* Custom popup styles */
+.custom-popup .leaflet-popup-content-wrapper { background-color: var(--card-background); color: var(--text-color); border-radius: 0.8rem; box-shadow: 0 0.2rem 0.5rem rgba(0,0,0,0.2); border: 1px solid var(--primary-accent); }
+.custom-popup .leaflet-popup-tip { background-color: var(--card-background); }
+.custom-popup .leaflet-popup-content { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 1.4rem; line-height: 1.5; margin: 1.0rem 1.5rem; }
+
+/* --- Risk Badge Styles (using 'rem') --- */
+.risk-badge { display: inline-block; padding: 0.8rem 2.0rem; border-radius: 99rem; font-weight: bold; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.1rem; }
+.risk-low { background-color: var(--risk-low-bg); color: var(--risk-low-text); }
+.risk-medium { background-color: var(--risk-medium-bg); color: var(--risk-medium-text); }
+.risk-high { background-color: var(--risk-high-bg); color: var(--risk-high-text); }
+
+/* --- New Summary Card Styles (using 'rem') --- */
+#summary-weather-card-new h2 { 
+  font-weight: 600; 
+  /* Inherits color, font-size, etc. from .card h2 */
+  margin: 0; 
+  padding: 2.0rem 2.5rem; 
 }
+.flood-risk-banner { display: flex; align-items: center; justify-content: center; gap: 1.0rem; padding: 1.2rem 2.5rem; font-weight: 700; font-size: 1.6rem; text-transform: uppercase; }
+.discharge-readout { padding: 2.0rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+.discharge-readout span { font-size: 1.4rem; color: #888; }
+.discharge-readout strong { font-size: 2.0rem; font-weight: 600; color: var(--primary-accent); }
 
-/* Defines the base style for all card elements. */
-.card {
-  background-color: var(--card-background); /* Uses the theme's card background color. */
-  padding: 25px; /* Adds padding inside the card. */
-  border-radius: 8px; /* Rounds the corners of the card. */
-  box-shadow: var(--card-shadow); /* Applies the theme's shadow effect. */
-  transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for theme change. */
-}
+.weather-details-grid { display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 2.0rem 2.5rem; gap: 2.0rem; }
+.weather-detail-box.temp { text-align: center; text-transform: capitalize; }
+.weather-detail-box.temp img { width: 6.0rem; height: 6.0rem; margin: -1.0rem auto; }
+.weather-detail-box.temp strong { font-size: 3.5rem; font-weight: 600; display: block; line-height: 1; }
+.weather-detail-box.temp span { font-size: 1.4rem; color: #888; }
 
-/* Styles the secondary headings (h2) within cards. */
-.card h2 {
-  margin-top: 0; /* Removes default top margin. */
-  border-bottom: 1px solid #eee; /* Adds a bottom border (consider using a variable). */
-  padding-bottom: 10px; /* Adds space below the heading text. */
-  color: var(--primary-accent); /* Uses the theme's accent color. */
-  transition: color 0.3s ease; /* Smooth transition for theme change. */
-}
+.weather-detail-box.details { display: flex; flex-direction: column; gap: 2.0rem; font-size: 1.4rem; }
+.weather-detail-box.details > div { line-height: 1.3; }
+.weather-detail-box.details span { color: #888; display: block; }
+.weather-detail-box.details strong { font-size: 1.8rem; font-weight: 600; }
 
-/* --- Specific Card Layouts (Grid Placement) --- */
-/* Cards will automatically flow into the 2-column grid. */
-/* We only need to define styles for items that span both columns. */
+.summary-last-updated { text-align: center; font-size: 1.2rem; color: #999; margin: 0; padding: 1.5rem 2.5rem; background-color: var(--table-row-even-background); }
 
-/* Search bar spans both columns. */
-#search-bar {
-  grid-column: 1 / -1; /* Spans from the first grid line to the last. */
-}
-
-/* Map Card - flows into column 1 (default) */
-#map-card {
-  /* No special grid-column needed. */
-}
-
-/* Weather Widget - flows into column 2 (default) */
-/* (Assuming WeatherWidget's root element has className="card") */
-
-/* Summary Card - flows into column 1 */
-#summary {
-  /* No special grid-column needed. */
-}
-
-/* Safety Card - flows into column 2 */
+/* --- Safety Recommendation Card Borders --- */
 #safety-recommendations {
-  /* No special grid-column needed. */
+  border-left-width: 0.5rem; /* 5px */
+  border-left-style: solid;
+  padding-left: 2.0rem; /* 20px */
+}
+#safety-recommendations.risk-low { border-left-color: var(--risk-low-text); }
+#safety-recommendations.risk-medium { border-left-color: var(--risk-medium-text); }
+#safety-recommendations.risk-high { border-left-color: var(--risk-high-text); }
+
+/* --- Empty State Message Style --- */
+.summary-empty-state {
+  padding: 2.0rem; /* 20px */
+  text-align: center;
+  font-size: 1.5rem; /* 15px */
+  color: #999; /* Use the same color as the card titles */
+  font-style: italic; /* Make it italic */
+  line-height: 1.5;
+  min-height: 10rem; /* Give the card some minimum height */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Forecast Table - spans both columns */
-#forecast-table-container {
-  grid-column: 1 / -1; /* Spans from the first grid line to the last. */
-}
+/* --- Dark theme fixes --- */
+body.dark-theme .discharge-readout { border-bottom-color: #444; }
+body.dark-theme .weather-detail-box.temp span, body.dark-theme .weather-detail-box.details span { color: #999; }
+body.dark-theme .summary-last-updated { color: #999; }
+body.dark-theme th, body.dark-theme td { border-bottom: 1px solid #444; }
+body.dark-theme footer { border-top: 1px solid #444; }
 
-/* Alert Subscription - spans both columns */
-#alert-subscription {
-  grid-column: 1 / -1; /* Spans from the first grid line to the last. */
-}
+/* --- Table Styles (using 'rem') --- */
+table { width: 100%; border-collapse: collapse; margin-top: 2.0rem; }
+th, td { padding: 1.2rem 1.5rem; text-align: left; border-bottom: 1px solid #ddd; }
+th { background-color: var(--primary-accent); color: var(--card-background); transition: background-color 0.15s ease, color 0.15s ease; }
+tbody tr:nth-child(even) { background-color: var(--table-row-even-background); transition: background-color 0.15s ease; }
+tbody tr:hover { background-color: var(--table-row-hover); }
 
-/* --- Table Styles --- */
+/* --- Footer (using 'rem') --- */
+footer { text-align: center; padding: 2.0rem; margin-top: 4.0rem; background-color: var(--card-background); border-top: 1px solid #e0e0e0; font-size: 1.4rem; color: #6c757d; transition: background-color 0.15s ease, color 0.15s ease; }
 
-/* Basic styles for the table element. */
-table {
-  width: 100%; /* Makes the table take full width of its container. */
-  border-collapse: collapse; /* Collapses cell borders into a single border. */
-  margin-top: 20px; /* Adds space above the table. */
-}
-
-/* Styles for table header (th) and data (td) cells. */
-th, td {
-  padding: 12px 15px; /* Adds padding inside cells. */
-  text-align: left; /* Aligns text to the left. */
-  border-bottom: 1px solid #ddd; /* Adds a bottom border to cells (consider variable). */
-}
-
-/* Styles specifically for table header cells. */
-th {
-  background-color: var(--primary-accent); /* Uses the theme's accent color for the header background. */
-  color: var(--card-background); /* Sets text color to contrast with the accent background. */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change. */
-}
-
-/* Adds alternating background color to even rows in the table body. */
-tbody tr:nth-child(even) {
-  background-color: var(--table-row-even-background); /* Uses the theme variable. */
-  transition: background-color 0.3s ease; /* Smooth transition for theme change. */
-}
-
-/* Sets the hover effect for table rows. */
-tbody tr:hover {
-  background-color: var(--table-row-hover); /* Uses the theme variable. */
-}
-/* (Note: The default :root definition for --table-row-hover is missing, added #e9ecef) */
-:root {
-  /* ... (rest of :root) ... */
-  --table-row-hover: #e9ecef; /* Light theme hover color */
-}
-
-
-/* --- Risk Level Text Colors --- */
-/* Applies specific colors and bold font weight based on risk level classes. */
-.risk-low { color: var(--risk-low); font-weight: bold; }
-.risk-medium { color: var(--risk-medium); font-weight: bold; }
-.risk-high { color: var(--risk-high); font-weight: bold; }
-
-/* --- Footer --- */
-/* Styles the footer section. */
-footer {
-  text-align: center; /* Centers the footer content. */
-  padding: 20px; /* Adds padding. */
-  margin-top: 40px; /* Adds space above the footer. */
-  background-color: var(--card-background); /* Uses the theme's card background color. */
-  border-top: 1px solid #e0e0e0; /* Adds a top border (consider variable). */
-  font-size: 0.9em; /* Sets font size. */
-  color: #6c757d; /* Sets text color (consider dark theme variable). */
-  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change. */
-}
-
-/* --- Responsive Design --- */
-/* Media query for tablet screens and below. */
+/* --- 3. Responsive Design & Scaling --- */
 @media (max-width: 992px) {
-  /* Changes the main content grid to a single column layout. */
-  main {
-    grid-template-columns: 1fr; /* Stacks grid items vertically. */
-  }
-  
-  /* Resets any specific column-spanning items back to a single column. */
-  /* This is not strictly necessary if they just flow, but ensures they stack. */
-  #search-bar,
-  #forecast-table-container,
-  #alert-subscription {
-    grid-column: 1 / -1; /* (Already set, but safe to keep) */
+  main { grid-template-columns: 1fr; }
+  #map-card, #summary-weather-card-new, #forecast-table-container, #safety-recommendations, #alert-subscription { grid-column: 1 / -1; grid-row: auto; }
+  header { flex-direction: column; gap: 1.5rem; }
+}
+
+/* This targets large desktops and 4K monitors */
+@media (min-width: 1800px) {
+  html {
+    /*
+     * We're just increasing the base font size.
+     * 16px * 0.75 = 12px.
+     * Now, 1rem = 12px.
+     * Every 'rem' value in your app will be 20% larger.
+    */
+    font-size: 75%; 
   }
 }

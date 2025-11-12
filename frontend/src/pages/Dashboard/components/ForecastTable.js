@@ -2,10 +2,11 @@ import React from 'react';
 
 // This component displays the forecast table.
 // It receives the forecastData array via props from the App component.
-function ForecastTable({ forecastData }) {
+function ForecastTable({ forecastData = [] }) { // Modern default props
 
     // Helper function to determine the CSS class based on the risk value.
     const getRiskClass = (risk) => {
+        if (!risk) return ''; // Handle null or undefined risk
         const riskLower = String(risk).toLowerCase();
 
         if (riskLower === 'low') return 'risk-low';
@@ -35,20 +36,32 @@ function ForecastTable({ forecastData }) {
                 <thead>
                     <tr>
                         <th>Time</th>
-                        {/* The 'level' data doesn't exist in the 'predictions' table yet. */}
-                        {/* <th>Predicted Water Level (meters)</th> */}
+                        <th>Predicted Discharge</th>
                         <th>Risk Level</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {/* Maps over the forecastData array passed in from App.js. */}
+                    {/* Maps over the forecastData array passed in from Dashboard.js. */}
                     {forecastData.map((dataPoint) => (
-                        // Uses the unique prediction_id from the database as the key.
                         <tr key={dataPoint.prediction_id}>
-                            {/* Uses the 'prediction_timestamp' field and formats it. */}
+                            {/* 1. The Timestamp */}
                             <td>{formatTimestamp(dataPoint.prediction_timestamp)}</td>
-                            {/* Uses the 'risk_level' field. */}
-                            <td className={getRiskClass(dataPoint.risk_level)}>{dataPoint.risk_level}</td>
+                            
+                            {/* 2. The Predicted Discharge (with bug fix) */}
+                            <td style={{ fontWeight: 'bold' }}>
+                              {/* Check if it's a number before calling .toFixed() */}
+                              {(typeof dataPoint.predicted_discharge === 'number')
+                                ? `${dataPoint.predicted_discharge.toFixed(2)} m³/s`
+                                : 'N/A' 
+                              }
+                            </td>
+                            
+                            {/* 3. The Risk Level (with new badge style) */}
+                            <td>
+                                <span className={`risk-badge ${getRiskClass(dataPoint.risk_level)}`}>
+                                    {dataPoint.risk_level}
+                                </span>
+                            </td>
                         </tr>
                     ))}
                 </tbody>
@@ -56,11 +69,6 @@ function ForecastTable({ forecastData }) {
         </div>
     );
 }
-
-// Sets a default value for the prop to prevent errors if it's undefined.
-ForecastTable.defaultProps = {
-    forecastData: []
-};
 
 // Exports the component.
 export default ForecastTable;

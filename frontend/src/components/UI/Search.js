@@ -1,38 +1,32 @@
-import React, { useState } from 'react';
+// src/components/ui/Search.js
+import React, { useState, useEffect } from 'react';
+import './Search.css'; // <-- 1. IMPORT THE NEW CSS FILE
 
-// Defines the Search component.
-// It receives the 'initialCity' and the 'onCityChange' function as props from App.js.
 function Search({ initialCity, onCityChange }) {
-  // State hook to manage the value of the search input field.
   const [cityInput, setCityInput] = useState(initialCity);
 
-  // Event handler for the form submission.
+  // This syncs the input if the prop changes
+  useEffect(() => {
+    setCityInput(initialCity);
+  }, [initialCity]);
+
   const handleSearch = (event) => {
-    event.preventDefault(); // Prevents the page from reloading.
-    // Calls the 'onCityChange' function (which is setCity in App.js)
-    // to update the global 'city' state.
+    event.preventDefault(); 
     onCityChange(cityInput);
   };
 
   return (
-    // Uses the 'card' style for visual consistency.
-    <div className="card" id="search-bar" style={{ gridColumn: '1 / -1', marginBottom: '30px' }}>
-      <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
+    // 2. USE THE NEW CSS CLASSES
+    <div className="card search-card" id="search-bar">
+      <form onSubmit={handleSearch} className="search-form">
         <input
           type="text"
+          className="search-input" // <-- Use class
           value={cityInput}
           onChange={(e) => setCityInput(e.target.value)}
           placeholder="Enter city name to update map and weather"
-          style={{ 
-            flexGrow: 1, 
-            padding: '10px', 
-            borderRadius: '20px', 
-            border: '1px solid #ccc' }}
         />
-        <button
-          type="submit"
-          style={{ padding: '10px 15px', borderRadius: '4px', border: 'none', backgroundColor: 'var(--primary-accent)', color: 'white', cursor: 'pointer' }}
-        >
+        <button type="submit" className="search-button"> {/* <-- Use class */}
           Search
         </button>
       </form>

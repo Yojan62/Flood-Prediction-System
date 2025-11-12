@@ -12,15 +12,15 @@ import Footer from './Footer';
 function Layout({ theme, toggleTheme }) {
   return (
     <>
+    <div className="container"> 
       <Header theme={theme} toggleTheme={toggleTheme} />
 
-      {/* <Outlet /> is the most important part.
-        React Router will automatically render your page component 
-        (e.g., Dashboard.js or About.js) right here.
-      */}
-      <Outlet />
+      <main>
+        <Outlet />
+      </main>
 
       <Footer />
+    </div>
     </>
   );
 }
