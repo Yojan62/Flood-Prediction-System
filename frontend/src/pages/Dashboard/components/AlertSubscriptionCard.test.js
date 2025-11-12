@@ -1,62 +1,90 @@
-// Imports testing utilities from React Testing Library and Jest-DOM.
+// Imports testing utilities
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import axios from 'axios'; // Import axios to mock it
 
 // Imports the component to be tested.
 import AlertSubscriptionCard from './AlertSubscriptionCard';
+
+// --- 1. MOCK AXIOS ---
+// This tells Jest to "fake" the axios library
+jest.mock('axios');
 
 // Defines a test suite for the AlertSubscriptionCard component.
 describe('AlertSubscriptionCard', () => {
 
   // Test case 1: Checks if the component renders the main elements correctly.
   test('renders the subscription form elements', () => {
-    // Renders the component.
-    render(<AlertSubscriptionCard />);
+    // Renders the component with the required prop
+    render(<AlertSubscriptionCard selectedLocationId={1} />);
 
-    // Checks if the heading "Get Flood Alerts" is present.
     expect(screen.getByRole('heading', { name: /get flood alerts/i })).toBeInTheDocument();
-
-    // Checks if the instructional paragraph is present.
-    expect(screen.getByText(/enter your email to receive alerts/i)).toBeInTheDocument();
-
-    // Checks if the email input field (identified by its placeholder) is present.
     expect(screen.getByPlaceholderText(/enter your email address/i)).toBeInTheDocument();
-
-    // Checks if the "Subscribe" button is present.
     expect(screen.getByRole('button', { name: /subscribe/i })).toBeInTheDocument();
   });
 
-  // Test case 2: Simulates user typing into the input and submitting the form.
-  test('allows user to type email and clears input on submit', () => {
-    // Mocks the window.alert function to prevent it from popping up during the test.
-    jest.spyOn(window, 'alert').mockImplementation(() => {});
+  // --- 2. THIS IS THE NEW, CORRECT INTERACTION TEST ---
+  test('allows user to type, submit, and see a success message', async () => {
+    
+    // Define what axios.post should "fake"
+    const mockSuccessMessage = 'Subscribed successfully!';
+    axios.post.mockResolvedValue({
+      data: { message: mockSuccessMessage }
+    });
 
-    // Renders the component.
-    render(<AlertSubscriptionCard />);
+    // Renders the component with the required prop
+    render(<AlertSubscriptionCard selectedLocationId={1} />);
 
-    // Finds the email input field by its placeholder text.
     const emailInput = screen.getByPlaceholderText(/enter your email address/i);
-    // Finds the submit button by its text.
     const submitButton = screen.getByRole('button', { name: /subscribe/i });
 
-    // Simulates a user typing an email address into the input field.
+    // Simulate typing
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-
-    // Asserts that the input field's value has been updated.
     expect(emailInput.value).toBe('test@example.com');
 
-    // Simulates clicking the submit button.
+    // Simulate clicking the submit button
+    fireEvent.click(submitButton);
+    
+    // Check that the button is disabled
+    expect(submitButton).toBeDisabled();
+    expect(screen.getByText(/subscribing.../i)).toBeInTheDocument();
+
+    // --- This is the key ---
+    // We "wait" for the success message to appear on the screen
+    const successMessage = await screen.findByText(mockSuccessMessage);
+
+    // Assert that the success message appeared
+    expect(successMessage).toBeInTheDocument();
+    // Assert that the input field was cleared
+    expect(emailInput.value).toBe('');
+    // Assert that the button is enabled again
+    expect(submitButton).not.toBeDisabled();
+  });
+  
+  // Test case 3: Check error handling
+  test('shows an error message if the API call fails', async () => {
+    
+    // Tell axios to "fake" a 404 error
+    axios.post.mockRejectedValue({
+      response: { data: { detail: 'Location not found.' } }
+    });
+
+    render(<AlertSubscriptionCard selectedLocationId={99} />);
+
+    const emailInput = screen.getByPlaceholderText(/enter your email address/i);
+    const submitButton = screen.getByRole('button', { name: /subscribe/i });
+
+    // Simulate typing and clicking
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
     fireEvent.click(submitButton);
 
-    // Asserts that the alert function was called (optional, confirms handleSubmit logic ran).
-    expect(window.alert).toHaveBeenCalled();
+    // Wait for the error message to appear
+    const errorMessage = await screen.findByText(/Error: Location not found./i);
+    expect(errorMessage).toBeInTheDocument();
 
-    // Asserts that the input field's value was cleared after submission.
-    expect(emailInput.value).toBe('');
-
-    // Restores the original window.alert function after the test.
-    window.alert.mockRestore();
+    // The input should NOT be cleared on error
+    expect(emailInput.value).toBe('test@example.com');
   });
 
 });

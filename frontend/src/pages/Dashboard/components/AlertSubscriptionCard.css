@@ -1,0 +1,66 @@
+/* src/pages/Dashboard/components/AlertSubscriptionCard.css */
+
+.subscription-form {
+  display: flex;
+  gap: 1.0rem; /* 10px */
+  margin-top: 1.5rem; /* 15px */
+}
+
+.subscription-input {
+  /* Remove default styles */
+  border: 1px solid #ccc;
+  background: none;
+  outline: none;
+  
+  /* Sizing and Font */
+  flex-grow: 1; /* Take up remaining space */
+  padding: 1.0rem; /* 10px */
+  border-radius: 0.4rem; /* 4px */
+  font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.6rem); /* Responsive font */
+  color: var(--text-color);
+}
+
+/* Style for the submit button */
+.subscription-button {
+  /* Remove default styles */
+  border: none;
+  outline: none;
+  cursor: pointer;
+  
+  /* Colors */
+  background-color: var(--primary-accent);
+  color: #fff; /* White text */
+  
+  /* Font and Sizing */
+  font-size: 1.4rem; /* 14px */
+  font-weight: 600;
+  padding: 1.0rem 1.5rem; /* 10px 15px */
+  border-radius: 0.4rem; /* 4px */
+  
+  /* Smooth transition on hover */
+  transition: opacity 0.3s ease;
+}
+
+.subscription-button:hover {
+  opacity: 0.8;
+}
+
+/* Dim the button when it's in a loading state */
+.subscription-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Style for the message (e.g., "Success!" or "Error") */
+.subscription-message {
+  margin-top: 1.5rem; /* 15px */
+  font-weight: 600;
+}
+
+/* Dynamically set the color based on class */
+.subscription-message.success {
+  color: var(--risk-low-text);
+}
+.subscription-message.error {
+  color: var(--risk-high-text);
+}

@@ -1,83 +1,95 @@
-#!/usr/bin/env python3
-"""
-run_predictions.py (improved)
-
-- Loads saved model (accepts either raw sklearn model or dict with keys: model, features, use_log_target)
-- Fetches flood + forecast weather from Open-Meteo API
-- Assembles live feature vector including real rainfall forecast for TOMORROW (calendar day)
-- Adapts to expected feature ordering and supports month_sin/month_cos if required
-- Saves prediction to DB and sends alerts
-"""
-
 import os
 import joblib
 import numpy as np
+import pandas as pd
 import requests
 import datetime as dt
-import pandas as pd
+from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 
-# DB / email imports (your project modules)
+# DB / email imports (my project modules)
 import database
 import models
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-# Config
+# --- 1. Configuration & Model Loading ---
+
+# Defines the paths to check for the model file.
+# This variable is defined at the top, so it will be
+# available for the load_model() function below.
+MODEL_REL_PATHS = [
+    # This path is correct for your 'ml/ml' structure 
+    os.path.join(os.path.dirname(__file__), '..', 'ml', 'ml', 'open_meteo_flood_model_v18.pkl'),
+    # Add any other backup paths here if needed
+]
+OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
 DEFAULT_LAT = 23.81
 DEFAULT_LON = 90.41
 TIMEOUT = 15
-MODEL_REL_PATHS = [
-    os.path.join(os.path.dirname(__file__), '..', 'ml', 'open_meteo_flood_model_v5.pkl'),
-    os.path.join(os.path.dirname(__file__), '..', 'ml', 'open_meteo_flood_model.pkl'),
-]
-OPEN_METEO_FLOOD_URL = "https://flood-api.open-meteo.com/v1/flood"
-OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
-
 
 # -------------------------
 # Model loader (robust)
 # -------------------------
-def load_model():
+def load_model(): # <-- The function is named 'load_model'
+    """
+    I'll load the v18 model bundle from the .pkl file.
+    """
     model_obj = None
+    # The 'MODEL_REL_PATHS' variable is now defined and can be used here.
     for p in MODEL_REL_PATHS:
         try:
             p_abs = os.path.abspath(p)
             if os.path.exists(p_abs):
                 print(f"Loading model from: {p_abs}")
                 loaded = joblib.load(p_abs)
-                # Accept either raw model or saved dict
+                
                 if isinstance(loaded, dict):
-                    model = loaded.get('model')
-                    features = loaded.get('features')
-                    use_log_target = loaded.get('use_log_target', False)
+                    # Unpacks the v18 bundle
+                    model = loaded.get('lgb_model')
+                    features = loaded.get('feature_names')
+                    scaler = loaded.get('scaler')
+                    threshold = loaded.get('thr')
+                    use_log_target = True # v18 model uses a log target
+                    
+                    if not all([model, features, scaler, threshold is not None]):
+                        print(f"Error: Model bundle at {p_abs} is missing keys (lgb_model, feature_names, scaler, thr).")
+                        continue
+                        
+                    print("Model bundle loaded successfully.")
+                    return {'model': model, 'features': features, 'use_log_target': use_log_target, 'scaler': scaler, 'thr': threshold}
                 else:
+                    # Fallback for older, raw models
+                    print(f"Warning: Loaded a raw model file from {p_abs}. This is not the v18 bundle.")
                     model = loaded
-                    features = None
-                    use_log_target = False
-                return {'model': model, 'features': features, 'use_log_target': use_log_target}
+                    return {'model': model, 'features': None, 'use_log_target': False, 'scaler': None, 'thr': 10000.0} # Fallback
         except Exception as e:
             print(f"Error loading {p}: {e}")
-    print("No model found in expected locations.")
+    print("No valid model found in expected locations.")
     return None
 
-
 # -------------------------
-# Helper: sum precipitation for a calendar date
+# Feature Engineering (from v18)
 # -------------------------
-def daily_sum_for_date(df_hourly, date):
-    """
-    df_hourly: DataFrame index = timezone-aware datetimes, column 'precipitation'
-    date: datetime.date object (local date)
-    Returns sum of precipitation for that calendar date
-    """
-    day_start = pd.Timestamp(date).tz_localize(df_hourly.index.tz) if df_hourly.index.tzinfo is None else pd.Timestamp(date).tz_localize(None)
-    # Filter by date (use .date() to be safe)
-    sel = df_hourly.index.date == date
-    if sel.sum() == 0:
-        return np.nan
-    return float(df_hourly.loc[sel, 'precipitation'].sum())
-
+def engineer_features(daily: pd.DataFrame, lead_days: int) -> pd.DataFrame:
+    """Create features (exactly as in flood_model_v18.py) ."""
+    df = daily.copy()
+    # Basic derived vars
+    df["tmean"] = (df["tmax"] + df["tmin"]) / 2.0
+    df["diurnal_range"] = df["tmax"] - df["tmin"]
+    df["precip_roll3"] = df["precip"].rolling(3, min_periods=1).sum()
+    df["precip_roll7"] = df["precip"].rolling(7, min_periods=1).sum()
+    df["rain_roll7"] = df["rain"].rolling(7, min_periods=1).sum()
+    df["et0_roll7"] = df["et0"].rolling(7, min_periods=1).sum()
+    df["tmean_roll7"] = df["tmean"].rolling(7, min_periods=1).mean()
+    # Lags
+    for l in [1, 2, 3, 7, 14]:
+        df[f"precip_lag{l}"] = df["precip"].shift(l)
+        df[f"rain_lag{l}"] = df["rain"].shift(l)
+        df[f"tmean_lag{l}"] = df["tmean"].shift(l)
+    # Drop rows with NaNs created by the 14-day lag
+    df = df.iloc[14:].copy() 
+    return df
 
 # -------------------------
 # Fetch and assemble live features (robust)
@@ -85,171 +97,67 @@ def daily_sum_for_date(df_hourly, date):
 def get_live_features_for_model(lat=DEFAULT_LAT, lon=DEFAULT_LON, expected_features=None):
     """
     Returns: (feature_vector_df, meta) or (None, error_message)
-    feature_vector_df: single-row DataFrame with columns matching expected_features (if provided), otherwise common defaults
+    feature_vector_df: single-row DataFrame with columns matching expected_features
     """
+    if expected_features is None:
+        return None, "Error: 'expected_features' list not provided by model bundle."
 
     try:
-        # 1) Fetch flood daily (use past 5 days to be safe)
-        flood_params = {
+        # 1) Fetch live weather data
+        # We must fetch the last 30 days for all lags and rolling averages
+        params = {
             "latitude": lat,
             "longitude": lon,
-            "daily": "river_discharge",
-            "past_days": 5,
-            "forecast_days": 0,
-            "timezone": "auto"
+            "daily": [
+                "precipitation_sum",
+                "rain_sum",
+                "temperature_2m_max",
+                "temperature_2m_min",
+                "windspeed_10m_max",
+                "shortwave_radiation_sum",
+                "et0_fao_evapotranspiration"
+            ],
+            "past_days": 30, # Must be >= 14 for the lags in engineer_features
+            "forecast_days": 1, # We only need today's data
+            "timezone": "UTC",
         }
-        r_flood = requests.get(OPEN_METEO_FLOOD_URL, params=flood_params, timeout=TIMEOUT)
-        r_flood.raise_for_status()
-        flood_json = r_flood.json()
-        if 'daily' not in flood_json or 'time' not in flood_json['daily']:
-            return None, "Flood API did not return expected daily/time keys."
-
-        df_flood = pd.DataFrame(flood_json['daily'])
-        df_flood['date'] = pd.to_datetime(df_flood['time'])
-        if 'river_discharge' not in df_flood.columns:
-            # try alternate name(s)
-            if 'river_discharge_mean' in df_flood.columns:
-                df_flood.rename(columns={'river_discharge_mean': 'river_discharge'}, inplace=True)
-            else:
-                return None, "river_discharge not found in flood API response."
-        df_flood = df_flood.set_index('date').sort_index()
-
-        # 2) Fetch forecast hourly weather (past + forecast)
-        weather_params = {
-            "latitude": lat,
-            "longitude": lon,
-            "hourly": ["precipitation", "soil_moisture_0_1cm", "et0_fao_evapotranspiration", "temperature_2m"],
-            "past_days": 7,
-            "forecast_days": 2,  # get at least next day
-            "timezone": "auto"
-        }
-        r_weather = requests.get(OPEN_METEO_FORECAST_URL, params=weather_params, timeout=TIMEOUT)
+        
+        r_weather = requests.get(OPEN_METEO_FORECAST_URL, params=params, timeout=TIMEOUT)
         r_weather.raise_for_status()
         weather_json = r_weather.json()
-        if 'hourly' not in weather_json:
-            return None, "Forecast API did not return hourly data."
 
-        # Convert hourly to DataFrame
-        hourly = weather_json['hourly']
-        df_hourly = pd.DataFrame(hourly)
-        # 'time' may be present as list; ensure parsed
-        df_hourly['time'] = pd.to_datetime(df_hourly['time'])
-        df_hourly = df_hourly.set_index('time').sort_index()
+        if 'daily' not in weather_json:
+            return None, "Open-Meteo API did not return 'daily' data."
 
-        # Get local "today" date according to API timezone (use index last timestamp to determine tz)
-        # We'll take the earliest future date available and call that 'tomorrow'
-        now = pd.Timestamp(df_hourly.index[-1])
-        # We want the next calendar date after 'today' in the hourly index
-        last_date_in_hourly = df_hourly.index[-1].date()
-        # Candidate tomorrow is (today + 1)
-        local_today = pd.Timestamp(df_hourly.index[0]).date()
-        # Use actual current date from system if index spans present moment
-        today_date = dt.date.today()
-        # safest: set tomorrow_date = min(date in hourly that's greater than today_date) if possible
-        future_dates = sorted({ts.date() for ts in df_hourly.index if ts.date() > today_date})
-        if future_dates:
-            tomorrow_date = future_dates[0]
-        else:
-            # fallback: today + 1
-            tomorrow_date = today_date + dt.timedelta(days=1)
+        # 2) Convert to DataFrame and rename
+        daily = pd.DataFrame(weather_json["daily"])
+        daily["time"] = pd.to_datetime(daily["time"])
+        daily = daily.set_index("time").sort_index()
 
-        # Sum precipitation for yesterday (to compute rainfall_lag_1 and 7-day avg) and tomorrow
-        # Build a daily-summed DataFrame from hourly (for past N days)
-        df_hourly['precipitation'] = df_hourly['precipitation'].astype(float)
-        daily_precip = df_hourly['precipitation'].resample('D').sum()
-        daily_soil = df_hourly['soil_moisture_0_1cm'].resample('D').mean()
-        daily_et0 = df_hourly['et0_fao_evapotranspiration'].resample('D').mean()
-        daily_temp = df_hourly['temperature_2m'].resample('D').mean()
-        df_daily = pd.concat([daily_precip, daily_soil, daily_et0, daily_temp], axis=1)
-        df_daily.columns = ['rainfall_mm', 'soil_moisture', 'evapotranspiration', 'temperature']
+        # I'll rename columns to the short names my 'engineer_features' function expects
+        daily = daily.rename(columns={
+            "precipitation_sum": "precip",
+            "rain_sum": "rain",
+            "temperature_2m_max": "tmax",
+            "temperature_2m_min": "tmin",
+            "windspeed_10m_max": "wind",
+            "shortwave_radiation_sum": "swrad",
+            "et0_fao_evapotranspiration": "et0",
+        })
 
-        # Determine the last fully-observed past day to use as "yesterday"
-        # Use today's date based on server/system - pick most recent date that is <= today_date
-        available_dates = [d for d in df_daily.index.date if d <= today_date]
-        if not available_dates:
-            # fallback to using earliest available
-            available_dates = sorted({d for d in df_daily.index.date})
-        last_past_date = sorted(available_dates)[-1]
-
-        # yesterday (lag 1) = last_past_date
-        yesterday_date = last_past_date
-        rainfall_lag_1 = float(df_daily.loc[str(yesterday_date), 'rainfall_mm']) if str(yesterday_date) in df_daily.index.astype(str) else float(df_daily.loc[df_daily.index.date == yesterday_date, 'rainfall_mm'].values[-1])
-        soil_moisture = float(df_daily.loc[str(yesterday_date), 'soil_moisture'])
-        evapotranspiration = float(df_daily.loc[str(yesterday_date), 'evapotranspiration'])
-        temperature = float(df_daily.loc[str(yesterday_date), 'temperature'])
-
-        # rainfall_7_day_avg: average of last 7 days ending yesterday
-        # get the 7-day window
-        window_end = pd.Timestamp(yesterday_date)
-        window_start = window_end - pd.Timedelta(days=6)
-        rainfall_7_day_avg = float(df_daily.loc[str(window_start.date()):str(window_end.date()), 'rainfall_mm'].mean())
-
-        # rainfall_forecast_24h: total precipitation on TOMORROW_DATE (calendar day)
-        rainfall_forecast_24h = float(df_daily.loc[str(tomorrow_date), 'rainfall_mm']) if str(tomorrow_date) in df_daily.index.astype(str) else float(df_daily[df_daily.index.date == tomorrow_date]['rainfall_mm'].sum())
-
-        # Discharge lags: use the flood API daily output and pick latest known days
-        # Build flood df (time already parsed)
-        df_flood = df_flood.sort_index()
-        # we expect df_flood to include last days; take last 3 valid values
-        last_discharge_vals = df_flood['river_discharge'].dropna()
-        if len(last_discharge_vals) < 3:
-            # try forward/backfill a bit or fail gracefully
-            last_discharge_vals = last_discharge_vals.reindex(pd.date_range(last_discharge_vals.index.min(), periods=3, freq='D')).ffill().bfill()
-        # select last available as today, previous as lag1, lag2
-        discharge_today = float(last_discharge_vals.iloc[-1])
-        discharge_lag_1 = float(last_discharge_vals.iloc[-2])
-        discharge_lag_2 = float(last_discharge_vals.iloc[-3])
-        discharge_3_day_avg = float(np.mean([discharge_lag_1, discharge_lag_2, discharge_today]))
-
-        # month (or month_sin/month_cos depending on expected features)
-        now_local = dt.date.today()
-        month_int = now_local.month
-        month_sin = np.sin(2 * np.pi * month_int / 12)
-        month_cos = np.cos(2 * np.pi * month_int / 12)
-
-        # Assemble dictionary of potential features (all names that v5 expects)
-        feat_dict = {
-            'discharge_m3_s': discharge_today,
-            'discharge_lag_1': discharge_lag_1,
-            'discharge_lag_2': discharge_lag_2,
-            'rainfall_lag_1': rainfall_lag_1,
-            'month': month_int,
-            'month_sin': month_sin,
-            'month_cos': month_cos,
-            'rainfall_7_day_avg': rainfall_7_day_avg,
-            'discharge_3_day_avg': discharge_3_day_avg,
-            'soil_moisture': soil_moisture,
-            'rainfall_forecast_24h': rainfall_forecast_24h,
-            'evapotranspiration': evapotranspiration,
-            'temperature': temperature,
-            # extras (ari / rain_x_soil) — compute simple versions
-            'ari_7': float(df_daily.loc[str(window_start.date()):str(window_end.date()), 'rainfall_mm'].multiply([0.7**i for i in range(7)][::-1]).sum()) if True else 0.0,
-            'rain_x_soil': rainfall_lag_1 * soil_moisture
-        }
-
-        # If expected_features provided, preserve that order, otherwise use a sensible default list
-        if expected_features:
-            # Build a one-row DataFrame in the exact order expected
-            row = {}
-            for f in expected_features:
-                if f in feat_dict:
-                    row[f] = feat_dict[f]
-                else:
-                    # fallback to 0 with a warning
-                    row[f] = 0.0
-            feature_df = pd.DataFrame([row], index=[pd.Timestamp.now()])
-        else:
-            # default ordering similar to v5 training
-            default_order = [
-                'discharge_m3_s', 'discharge_lag_1', 'discharge_lag_2',
-                'discharge_3_day_avg', 'rainfall_lag_1', 'rainfall_3_day_sum' if False else 'rainfall_7_day_avg',
-                'rainfall_7_day_avg', 'rainfall_forecast_24h', 'ari_7', 'rain_x_soil',
-                'soil_moisture', 'evapotranspiration', 'temperature', 'month_sin', 'month_cos'
-            ]
-            row = {k: feat_dict.get(k, 0.0) for k in default_order}
-            feature_df = pd.DataFrame([row], index=[pd.Timestamp.now()])
-
-        return feature_df, {'tomorrow_date': tomorrow_date, 'yesterday_date': yesterday_date}
+        # 3) Engineer features (using the *exact* same function from v18 script)
+        df_features = engineer_features(daily, lead_days=0)
+        
+        # 4) Get the *very last row* of features (this is "today")
+        #    and ensure it only has the columns the model expects
+        latest_features_row = df_features[expected_features].iloc[-1:]
+        
+        if latest_features_row.empty:
+            return None, "Feature engineering resulted in empty data."
+            
+        print("Successfully fetched and engineered live features.")
+        # Return the single-row DataFrame
+        return latest_features_row, None
 
     except Exception as e:
         return None, f"Exception while fetching live features: {e}"
@@ -259,88 +167,155 @@ def get_live_features_for_model(lat=DEFAULT_LAT, lon=DEFAULT_LON, expected_featu
 # SendGrid helper (unchanged)
 # -------------------------
 def send_flood_alert(user_email, location_name, risk_level, predicted_discharge):
+    """
+    Sends a single flood alert email using SendGrid.
+    """
     sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
     from_email = os.getenv("SENDGRID_FROM_EMAIL")
     if not sendgrid_api_key or not from_email:
-        print("SendGrid not configured.")
+        print("Error: SendGrid credentials not configured.")
         return
+
+    # Creates an email message with the discharge data
     message = Mail(
         from_email=from_email,
         to_emails=user_email,
         subject=f"FLOOD ALERT: {risk_level} Risk Detected for {location_name}",
-        html_content=f"<strong>Automated flood alert for {location_name}</strong><p>Risk: {risk_level}</p><p>Predicted discharge: {predicted_discharge:.2f} m³/s</p>"
+        html_content=f"""
+            <strong>This is an automated flood alert for {location_name}.</strong>
+            <p>A new prediction has detected a <strong>{risk_level}</strong> risk of flooding.</p>
+            <p>The predicted flood metric (discharge proxy) for tomorrow is <strong>{predicted_discharge:.2f}</strong>.</p>
+            <p>Please take necessary precautions.</p>
+        """
     )
+    
     try:
         sg = SendGridAPIClient(sendgrid_api_key)
         sg.send(message)
+        print(f"Successfully sent alert to {user_email}")
     except Exception as e:
-        print("SendGrid error:", e)
-
-
+        print(f"Error sending email to {user_email}: {e}")
+        
 # -------------------------
 # Main prediction cycle
 # -------------------------
 def run_prediction_cycle():
+    """
+    Main function to run the prediction, save it, and trigger alerts.
+    """
     model_bundle = load_model()
     if not model_bundle:
-        print("No model loaded. Exiting.")
+        print("Model bundle is not loaded. Aborting prediction cycle.")
         return
+        
+    # I'll unpack the v18 model bundle
     model = model_bundle['model']
     features_expected = model_bundle['features']
     use_log_target = model_bundle['use_log_target']
+    scaler = model_bundle['scaler']
+    DANGER_DISCHARGE = model_bundle['thr'] # The threshold calculated during training
+    MEDIUM_DISCHARGE = DANGER_DISCHARGE * 0.8 # 80% of danger level
 
-    db = database.SessionLocal()
+    print(f"--- Starting new prediction cycle (Model v18) ---")
+    print(f"Flood Threshold set to: {DANGER_DISCHARGE:.2f}")
+    
+    db: Session = database.SessionLocal()
+    
     try:
+        # I'll process all locations in my database
         locations = db.query(models.Location).all()
+        if not locations:
+            print("No locations found in database. Add locations via 'batch_upload_all.py' or API.")
+            return
+
         for location in locations:
-            print(f"Processing location {location.location_id} - {location.name}")
-            feature_df, meta = get_live_features_for_model(lat=location.latitude, lon=location.longitude, expected_features=features_expected)
+            print(f"\nProcessing location: {location.name} (ID: {location.location_id})")
+            
+            # --- 1. Get Live Data ---
+            # This returns a single-row DataFrame
+            feature_df, error = get_live_features_for_model(
+                lat=location.latitude, 
+                lon=location.longitude, 
+                expected_features=features_expected
+            )
+            
             if feature_df is None:
-                print("Failed to get features:", meta)
-                continue
+                print(f"Could not get live data for {location.name}: {error}")
+                continue # Skip to the next location
 
-            # Ensure correct ordering of columns to match model
-            if features_expected:
-                X = feature_df[features_expected]
-            else:
-                X = feature_df
-
-            # Predict
+            # --- 2. Run the REAL Model ---
+            
+            # --- THIS IS THE FIX ---
+            # 1. Get the feature values as an array (no names) for the scaler
+            X_unscaled_values = feature_df[features_expected].values
+            
+            # 2. Scale the data (Array -> Array)
+            X_scaled_values = scaler.transform(X_unscaled_values)
+            
+            # 3. Convert the scaled array *back* to a DataFrame with names for the model
+            X_scaled_df = pd.DataFrame(X_scaled_values, columns=features_expected)
+            # --- END FIX ---
+            
+            # Predict using the DataFrame
             try:
-                y_pred_raw = model.predict(X.values)[0]
-                # If model was trained on log1p, the saved metadata indicates this. We'll assume model returns transformed if so.
+                y_pred_raw = model.predict(X_scaled_df)[0]
+                
+                # I must invert the log (np.expm1) if the model was trained on a log target
                 if use_log_target:
                     predicted_discharge = float(np.expm1(y_pred_raw))
                 else:
                     predicted_discharge = float(y_pred_raw)
+
+            # ... (rest of the try/except block) ...
             except Exception as e:
                 print("Prediction failed:", e)
                 continue
 
-            # Determine risk
-            threshold = location.danger_threshold if location.danger_threshold is not None else 999999.0
-            risk = "LOW"
-            if predicted_discharge >= threshold:
-                risk = "HIGH"
-            elif predicted_discharge >= 0.8 * threshold:
-                risk = "MEDIUM"
+            # --- 3. Determine Risk Level ---
+            risk_level = "LOW"
+            if predicted_discharge >= DANGER_DISCHARGE:
+                risk_level = "HIGH"
+            elif predicted_discharge >= MEDIUM_DISCHARGE:
+                risk_level = "MEDIUM"
+            
+            print(f"Prediction for {location.name}: {risk_level} (Predicted Discharge: {predicted_discharge:.2f})")
 
-            # Save to DB
-            pred = models.Prediction(location_id=location.location_id, predicted_discharge=predicted_discharge, risk_level=risk)
-            db.add(pred)
+            # --- 4. SAVE THE PREDICTION TO THE DATABASE ---
+            # (This part is correct)
+            db_prediction = models.Prediction(
+                location_id=location.location_id,
+                predicted_discharge=predicted_discharge, 
+                risk_level=risk_level
+            )
+            db.add(db_prediction)
             db.commit()
-            print(f"Saved prediction id={pred.prediction_id} discharge={predicted_discharge:.2f} risk={risk}")
+            print(f"Successfully saved prediction {db_prediction.prediction_id} to database.")
 
-            # Send alerts
-            if risk == "HIGH":
-                users = db.query(models.User).filter(models.User.subscribed_location_id == location.location_id).all()
-                for u in users:
-                    send_flood_alert(u.email, location.name, risk, predicted_discharge)
+            # --- 5. TRIGGER ALERTS IF RISK IS HIGH ---
+            # (This part is correct)
+            if db_prediction.risk_level == "HIGH":
+                print(f"Risk is HIGH for {location.name}. Checking for subscribed users...")
+                
+                users_to_alert = db.query(models.User).filter(
+                    models.User.subscribed_location_id == location.location_id
+                ).all()
 
+                if not users_to_alert:
+                    print("No users are subscribed to this location. No alerts sent.")
+                else:
+                    print(f"Found {len(users_to_alert)} user(s) to alert.")
+                    for user in users_to_alert:
+                        send_flood_alert(user.email, location.name, db_prediction.risk_level, predicted_discharge)
+            else:
+                print("Risk is not HIGH. No alerts will be sent.")
+
+    except Exception as e:
+        print(f"An error occurred during the prediction cycle: {e}")
+        db.rollback()
     finally:
         db.close()
-
+        print("\n--- Prediction cycle finished ---")
 
 if __name__ == "__main__":
-    load_dotenv()
+    load_dotenv() # Loads my .env file
     run_prediction_cycle()

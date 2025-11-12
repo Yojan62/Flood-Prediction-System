@@ -63,7 +63,7 @@ function WeatherWidget({ city, onCoordsChange }) {
 
   // Returns the JSX structure (no form).
   return (
-    <div style={widgetStyles} className="card"> {/* Added 'card' class */}
+    <div style={widgetStyles} className="card" id="weather-widget"> {/* Added 'card' class */}
       <h3>Current Weather</h3>
       {/* Conditional rendering area for loading, error, or weather data. */}
       {loading && <p>Loading weather...</p>}

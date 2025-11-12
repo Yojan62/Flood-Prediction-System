@@ -11,7 +11,7 @@ describe('Header Component', () => {
   // Defines a specific test case within the suite.
   test('renders the correct title', () => {
     // Renders the Header component into a virtual DOM for testing.
-    render(<Header />);
+    render(<Header theme="light" toggleTheme={() => {}} />);
 
     // Finds an element in the rendered output whose text content matches
     // the regular expression /Flood Forecasting Dashboard/i (case-insensitive).

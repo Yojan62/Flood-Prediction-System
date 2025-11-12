@@ -1,0 +1,56 @@
+
+.search-card {
+  /* This uses the global card style, but we remove padding */
+  padding: 0 !important; 
+}
+
+.search-form {
+  display: flex;
+  gap: 1.5rem; /* 15px */
+}
+
+.search-input {
+  /* Remove all default browser styles */
+  border: none;
+  outline: none;
+  background: none;
+  
+  /* Sizing and Font */
+  width: 100%;
+  font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.6rem); /* This is the correct responsive size */
+  color: var(--text-color);
+  padding: 2.0rem 2.5rem; /* 20px 25px */
+}
+
+/* Style for the placeholder text */
+.search-input::placeholder {
+  color: #999;
+}
+
+/* Style for the search button */
+.search-button {
+  /* Remove default styles */
+  border: none;
+  outline: none;
+  cursor: pointer;
+  
+  /* Colors */
+  background-color: var(--primary-accent);
+  color: #fff;
+  
+  /* Font and Sizing */
+  font-size: 1.6rem; /* 16px */
+  font-weight: 600;
+  padding: 0 3.0rem; /* 30px */
+  
+  /* Make it match the card's rounded corner */
+  border-top-right-radius: 1.2rem;    /* 12px */
+  border-bottom-right-radius: 1.2rem; /* 12px */
+  
+  /* Smooth transition on hover */
+  transition: opacity 0.3s ease;
+}
+
+.search-button:hover {
+  opacity: 0.8;
+}

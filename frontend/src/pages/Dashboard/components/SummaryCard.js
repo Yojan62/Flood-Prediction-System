@@ -23,10 +23,11 @@ function SummaryCard({ data }) {
     <div className="card" id="summary">
       <h2>Forecast Summary</h2>
       {/* Section to display the current risk level. */}
-      <div className="summary-item">
-        <span>Current Risk Level:</span>
-        {/* Displays the currentRisk and applies the correct color class. */}
-        <strong className={getRiskClass(currentRisk)}>{currentRisk}</strong>
+      <div className="summary-item" style={{ textAlign: 'center', margin: '15px 0' }}>
+        {/* This is the new "badge" style */}
+        <span className={`risk-badge ${getRiskClass(currentRisk)}`}>
+          {currentRisk}
+        </span>
       </div>
       {/* Section to display the peak water level. */}
       <div className="summary-item">

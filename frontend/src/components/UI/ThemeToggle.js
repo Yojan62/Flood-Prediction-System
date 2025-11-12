@@ -24,10 +24,9 @@ function ThemeToggle({ theme, toggleTheme }) {
         {/* Conditionally renders either the Sun or Moon icon inside the circle. */}
         {/* If 'isDark' is true (dark theme active), the Sun icon is shown. */}
         {isDark ? (
-          <FaSun size={14} className="icon-light" /> // Sun icon, typically for a dark background.
+          <FaSun className="icon-light" />
         ) : (
-          // If 'isDark' is false (light theme active), the Moon icon is shown.
-          <FaMoon size={14} className="icon-dark" /> // Moon icon, typically for a light background.
+          <FaMoon className="icon-dark" />
         )}
       </span>
     </button>
