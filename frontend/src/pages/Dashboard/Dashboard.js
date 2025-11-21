@@ -1,23 +1,22 @@
 // src/pages/Dashboard/Dashboard.js
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Imports axios for making HTTP requests.
+import axios from 'axios';
 
-// --- Imports all the UI components ---
 import MapCard from './components/MapCard';
-import ForecastTable from './components/ForecastTable';
 import AlertSubscriptionCard from './components/AlertSubscriptionCard';
-import SafetyRecommendationsCard from './components/SafetyRecommendationsCard';
-import SummaryWeatherCard from './components/SummaryWeather'; 
-import Search from '../../components/UI/Search'; 
+import SummaryCard from './components/SummaryCard';
+import WeatherWidget from './components/WeatherWidget';
+import Forecastgraph from './components/ForecastGraph';
 
-// Defines the main dashboard page component.
+import "../../styles/dashboard.css";
+
 function Dashboard({ theme }) {
-  // --- State Management ---
   const [locations, setLocations] = useState([]);
-  const [city, setCity] = useState(''); 
-  const [mapCenter, setMapCenter] = useState([23.6850, 90.3563]); // Center of Bangladesh
+  const [mapCenter, setMapCenter] = useState([23.6850, 90.3563]);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  
+  const [selectedCoords, setSelectedCoords] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const [forecastData, setForecastData] = useState([]);
   const [summaryData, setSummaryData] = useState({
     currentRisk: null,
@@ -25,8 +24,9 @@ function Dashboard({ theme }) {
     lastUpdated: null
   });
 
-  // --- Effects ---
-
+  /* ------------------------------
+     Fetch Locations
+  ------------------------------ */
   useEffect(() => {
     const fetchLocations = async () => {
       try {
@@ -34,27 +34,50 @@ function Dashboard({ theme }) {
         setLocations(response.data);
       } catch (error) {
         console.error("Failed to fetch locations:", error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchLocations();
-  }, []); // Runs only once.
+  }, []);
 
-  // Fetches predictions (This is correct)
+  /* ------------------------------
+     Fetch Predictions
+  ------------------------------ */
   useEffect(() => {
     const fetchPredictionData = async () => {
-      if (!selectedLocation) return; 
+      if (!selectedLocation) {
+        setForecastData([]);
+        setSummaryData({
+          currentRisk: null,
+          peakLevel: null,
+          lastUpdated: null
+        });
+        setSelectedCoords(null);
+        return;
+      }
 
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/api/predictions/${selectedLocation}`);
+        const response = await axios.get(
+          `http://127.0.0.1:8000/api/predictions/${selectedLocation}`
+        );
 
-        if (response.data && response.data.length > 0) {
+        if (response.data.length > 0) {
+          const latest = response.data[0];
           setForecastData(response.data);
-          const latestPrediction = response.data[0];
+
           setSummaryData({
-            currentRisk: latestPrediction.risk_level,
-            peakLevel: latestPrediction.predicted_discharge,
-            lastUpdated: new Date(latestPrediction.prediction_timestamp).toLocaleString()
+            currentRisk: latest.risk_level,
+            peakLevel: latest.predicted_discharge,
+            lastUpdated: new Date(latest.prediction_timestamp).toLocaleString()
           });
+
+          const loc = locations.find(l => l.location_id === selectedLocation);
+          if (loc) {
+            const coords = [loc.latitude, loc.longitude];
+            setSelectedCoords(coords);
+            setMapCenter(coords);
+          }
         } else {
           setForecastData([]);
           setSummaryData({
@@ -65,41 +88,64 @@ function Dashboard({ theme }) {
         }
       } catch (error) {
         console.error("Failed to fetch prediction data:", error);
-        setSummaryData({ currentRisk: "Error", peakLevel: "N/A", lastUpdated: "N/A" });
+        setSummaryData({
+          currentRisk: "Error",
+          peakLevel: "N/A",
+          lastUpdated: "N/A"
+        });
       }
     };
 
     fetchPredictionData();
-  }, [selectedLocation]); 
+  }, [selectedLocation, locations]);
 
 
-  // Returns the JSX structure for *just* the dashboard content.
-  // In src/pages/Dashboard/Dashboard.js
-
+  /* ------------------------------
+     Layout
+  ------------------------------ */
   return (
-    <>
-      <Search initialCity={city} onCityChange={setCity} />
-      
-      <MapCard 
-        theme={theme} 
-        locations={locations} 
-        mapCenter={mapCenter}
-        onMarkerClick={setSelectedLocation}
-        selectedLocationId={selectedLocation}
-      />
-      
-      <SummaryWeatherCard 
-        summaryData={summaryData}
-        city={city}
-        onCoordsChange={setMapCenter}
-      />
-      
-      <SafetyRecommendationsCard currentRisk={summaryData.currentRisk} />
-      <ForecastTable forecastData={forecastData} />
-      <AlertSubscriptionCard 
-        selectedLocationId={selectedLocation} 
-      />
-    </>
+    <div className="dashboard-page">
+      <div className="container">
+
+        <div className="dashboard-grid">
+
+          {/* FULL WIDTH — Map */}
+          <div className="full">
+            <MapCard
+              theme={theme}
+              locations={locations}
+              mapCenter={mapCenter}
+              onMarkerClick={setSelectedLocation}
+              selectedLocationId={selectedLocation}
+              loading={loading}
+            />
+          </div>
+
+          {/* FULL WIDTH — Forecast Graph */}
+          <div className="full">
+            <Forecastgraph 
+              forecastData={forecastData} 
+              dangerThreshold={7.52}
+              theme={theme}
+            />
+          </div>
+
+          {/* TWO COLUMNS — Summary */}
+          <div className="wide">
+            <SummaryCard data={summaryData} />
+          </div>
+
+          {/* ONE COLUMN — Weather Widget */}
+          <WeatherWidget coords={selectedCoords} />
+
+          {/* FULL WIDTH — Alerts */}
+          <div className="full">
+            <AlertSubscriptionCard selectedLocationId={selectedLocation} />
+          </div>
+
+        </div>
+      </div>
+    </div>
   );
 }
 

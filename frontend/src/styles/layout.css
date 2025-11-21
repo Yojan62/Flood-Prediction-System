@@ -1,0 +1,45 @@
+/* NAVBAR */
+.main-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.6rem 2rem;
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+  font-size: 2rem;
+  text-decoration: none;
+}
+.nav-logo img {
+  height: 48px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.nav-links a {
+  color: var(--text);
+  text-decoration: none;
+  font-size: 1.6rem;
+}
+.nav-links a.active {
+  color: var(--accent);
+}
+
+/* FOOTER */
+footer {
+  padding: 2rem;
+  margin-top: 5rem;
+  background: var(--card-bg);
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--text);
+}

@@ -1,0 +1,98 @@
+/* src/pages/Dashboard/components/SummaryCard.css */
+
+#summary.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+#summary h2 {
+  margin-bottom: 0.5rem;
+}
+
+/* Each row item */
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.5rem;
+}
+
+/* Label on the left */
+.summary-item span {
+  color: #6c757d;
+}
+
+body.dark-theme #summary .summary-item span {
+  color: #9ca3af;
+}
+
+/* Values on the right */
+.summary-item strong {
+  font-size: 1.6rem;
+  color: var(--text);
+}
+
+/* Risk Badge in the center */
+#summary .summary-item.centered {
+  justify-content: center;
+}
+
+/* Clean risk badge overrides */
+#summary .risk-badge {
+  font-size: 1.2rem;
+  padding: 0.8rem 2rem;
+  font-weight: 600;
+  letter-spacing: 0.04rem;
+  text-transform: capitalize;
+}
+
+/* Empty state */
+.summary-empty-state {
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-style: italic;
+  color: #999;
+}
+
+/* ---------------------------------------
+   Risk Badge Colour Styling
+---------------------------------------- */
+
+/* LOW */
+.risk-low {
+  background: #e3fcec;    /* light green */
+  color: #1d9a5b;         /* dark green text */
+}
+
+/* MEDIUM */
+.risk-medium {
+  background: #fff8e1;    /* soft amber */
+  color: #ffa000;         /* amber text */
+}
+
+/* HIGH */
+.risk-high {
+  background: #ffebee;    /* light red */
+  color: #d32f2f;         /* danger red */
+}
+
+/* Dark theme overrides */
+.dark-theme .risk-low {
+  background: #1d9a5b;
+  color: #ffffff;
+}
+
+.dark-theme .risk-medium {
+  background: #ffa000;
+  color: #ffffff;
+}
+
+.dark-theme .risk-high {
+  background: #d32f2f;
+  color: #ffffff;
+}
+

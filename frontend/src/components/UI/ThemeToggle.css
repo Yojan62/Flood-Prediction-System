@@ -1,62 +1,80 @@
+/* ============================================================
+   Theme Toggle Switch — Dynamic Accent Colors
+   ------------------------------------------------------------ */
+
 .theme-toggle-switch {
-  /* Basic Button Reset */
-  background-color: var(--table-row-hover);
-  border: 1px solid var(--table-row-hover);
-  border-radius: 99rem; /* Pill shape */
+  /* Reset */
+  border: none;
+  outline: none;
   cursor: pointer;
-  padding: 0.4rem; /* 4px */
-  
-  /* Sizing in rem */
-  width: 5.0rem;  /* 50px */
-  height: 2.6rem; /* 26px */
-  
-  /* Positioning */
-  position: relative; /* Let the header's flexbox position this */
+
+  /* Shape */
+  border-radius: 99rem;
+  width: 5rem;
+  height: 2.6rem;
+  padding: 0.3rem;
+
+  /* DEFAULT STATE (Light Mode) */
+  /* Uses a neutral gray background for the "off" state */
+  background-color: #e2e8f0; 
+  border: 1px solid var(--border);
+
+  /* Layout */
   display: flex;
   align-items: center;
-  
-  /* Smooth transition for the circle */
-  transition: background-color 0.15s ease;
+  position: relative;
+
+  /* Animation */
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
+/* ACTIVE STATE (Dark Mode) */
+/* When dark mode is active, the background becomes the ACCENT color */
 body.dark-theme .theme-toggle-switch {
-  background-color: var(--primary-accent);
-  border-color: var(--primary-accent);
+  background-color: var(--accent); /* This will be Purple/Indigo defined in safety.css */
+  border-color: var(--accent);
 }
 
+/* Slider Circle (Thumb) */
 .slider-circle {
-  background-color: #fff;
+  width: 2rem;
+  height: 2rem;
+
+  background-color: var(--card-bg);
   border-radius: 50%;
-  
-  /* Sizing in rem */
-  height: 2.0rem; /* 20px */
-  width: 2.0rem;  /* 20px */
-  
-  /* Positioning the circle */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+
   position: absolute;
-  top: 0.3rem;  /* 3px */
-  left: 0.4rem; /* 4px */
-  
-  /* Transition for the slide */
-  transition: transform 0.15s ease;
-  
-  /* Center the icon inside */
+  left: 0.3rem;
+  top: 0.3rem;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1),
+              background-color 0.3s ease;
 }
 
-/* This is the "slide" animation */
+/* Slide Animation for Dark Mode */
 body.dark-theme .slider-circle {
-  transform: translateX(2.3rem); /* 23px */
+  transform: translateX(2.3rem);
 }
 
-/* Icon colors */
+/* Icon styling */
 .icon-light {
-  color: #f39c12; /* Sun color */
-  font-size: 1.4rem; /* 14px */
+  color: #f59e0b; /* Sun color (Orange/Yellow) */
+  font-size: 1.4rem;
+  transition: color 0.3s ease;
 }
+
 .icon-dark {
-  color: #4a4a4a; /* Moon color */
-  font-size: 1.4rem; /* 14px */
+  color: #64748b; /* Moon color (Gray) */
+  font-size: 1.4rem;
+  transition: color 0.3s ease;
+}
+
+/* Icon colors inside the active toggle */
+body.dark-theme .icon-dark {
+  color: var(--accent); /* The moon icon takes the accent color */
 }

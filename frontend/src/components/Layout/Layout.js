@@ -1,27 +1,19 @@
-// src/components/layout/Layout.js
-import React from 'react';
-import { Outlet } from 'react-router-dom';
+import React from "react";
+import { Outlet } from "react-router-dom";
+import Header from "./Header";
+import Footer from "./Footer";
 
-// Import your Header and Footer
-// You'll need to update these paths based on your new folder structure
-import Header from './Header'; 
-import Footer from './Footer';
+import "../../styles/layout.css";
 
-// The Layout component receives the global 'theme' and 'toggleTheme' props
-// from App.js and passes them down to the Header.
 function Layout({ theme, toggleTheme }) {
   return (
-    <>
-    <div className="container"> 
+    <div className="app-layout">
       <Header theme={theme} toggleTheme={toggleTheme} />
-
       <main>
         <Outlet />
       </main>
-
       <Footer />
     </div>
-    </>
   );
 }
 
