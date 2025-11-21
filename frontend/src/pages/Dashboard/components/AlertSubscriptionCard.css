@@ -1,66 +1,103 @@
-/* src/pages/Dashboard/components/AlertSubscriptionCard.css */
+/* ============================================================
+   AlertSubscriptionCard — Final Polished Styles
+   ------------------------------------------------------------ */
 
+/* Form layout */
 .subscription-form {
   display: flex;
-  gap: 1.0rem; /* 10px */
-  margin-top: 1.5rem; /* 15px */
+  gap: 1rem;
+  margin-top: 1.5rem;
+  align-items: center;
 }
 
+/* Input field */
 .subscription-input {
-  /* Remove default styles */
-  border: 1px solid #ccc;
-  background: none;
+  flex-grow: 1;
+
+  /* Appearance */
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+
+  /* Spacing */
+  padding: 1rem 1.2rem;
+
+  /* Typography */
+  font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.6rem);
+
+  /* UX */
   outline: none;
-  
-  /* Sizing and Font */
-  flex-grow: 1; /* Take up remaining space */
-  padding: 1.0rem; /* 10px */
-  border-radius: 0.4rem; /* 4px */
-  font-size: clamp(1.4rem, 1.2rem + 0.5vw, 1.6rem); /* Responsive font */
-  color: var(--text-color);
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
-/* Style for the submit button */
+.subscription-input:focus {
+  border-color: var(--accent);
+  background: var(--table-even);
+}
+
+/* Submit button */
 .subscription-button {
-  /* Remove default styles */
   border: none;
   outline: none;
   cursor: pointer;
-  
+
   /* Colors */
-  background-color: var(--primary-accent);
-  color: #fff; /* White text */
-  
-  /* Font and Sizing */
-  font-size: 1.4rem; /* 14px */
+  background-color: var(--accent);
+  color: #fff;
+
+  /* Shape & size */
+  padding: 1rem 1.8rem;
+  border-radius: 0.6rem;
+
+  /* Typography */
+  font-size: 1.4rem;
   font-weight: 600;
-  padding: 1.0rem 1.5rem; /* 10px 15px */
-  border-radius: 0.4rem; /* 4px */
-  
-  /* Smooth transition on hover */
-  transition: opacity 0.3s ease;
+
+  /* Animation */
+  transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
 .subscription-button:hover {
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
-/* Dim the button when it's in a loading state */
+.subscription-button:active {
+  opacity: 0.75;
+}
+
 .subscription-button:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Style for the message (e.g., "Success!" or "Error") */
+/* Message below the form */
 .subscription-message {
-  margin-top: 1.5rem; /* 15px */
+  margin-top: 1.5rem;
   font-weight: 600;
+  font-size: 1.4rem;
 }
 
-/* Dynamically set the color based on class */
 .subscription-message.success {
   color: var(--risk-low-text);
 }
+
 .subscription-message.error {
   color: var(--risk-high-text);
+}
+
+
+/* ============================================================
+   RESPONSIVENESS
+   ------------------------------------------------------------ */
+@media (max-width: 600px) {
+  .subscription-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .subscription-button {
+    width: 100%;
+    text-align: center;
+  }
 }

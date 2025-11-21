@@ -1,0 +1,327 @@
+/* ============================================================
+   LANDING PAGE VARIABLES
+   ------------------------------------------------------------ */
+:root {
+  --bg-color: #f8fafc;
+  --card-bg: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --radius: 16px;
+
+  /* LIGHT THEME ACCENT: Forest Green */
+  --accent: #15803d; 
+  --accent-hover: #166534;
+  --hero-overlay: linear-gradient(135deg, rgba(20, 83, 45, 0.9), rgba(22, 163, 74, 0.6));
+}
+
+body.dark-theme {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border: #334155;
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+
+  /* DARK THEME ACCENT: Electric Blue */
+  --accent: #00BFFF; 
+  --accent-hover: #009ACD;
+  --hero-overlay: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(0, 191, 255, 0.5));
+}
+
+/* ============================================================
+   GLOBAL LAYOUT
+   ------------------------------------------------------------ */
+.landing-page-wrapper {
+  width: 100%;
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* INCREASED PADDING HERE */
+.section-spacer {
+  padding: 8rem 0; /* More breathing room */
+}
+
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.section-subtitle {
+  font-size: 1.2rem;
+  text-align: center;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 4rem auto;
+}
+
+/* ============================================================
+   HERO SECTION
+   ------------------------------------------------------------ */
+.hero-section {
+  position: relative;
+  height: 85vh; 
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  color: white;
+  margin-bottom: 2rem;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--hero-overlay);
+  backdrop-filter: blur(2px);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 900px;
+  padding: 2rem;
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-title {
+  font-size: 5rem;
+  font-weight: 900;
+  margin-bottom: 1rem;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  letter-spacing: -0.05em;
+  line-height: 1.1;
+}
+
+.hero-subtitle {
+  font-size: 1.75rem;
+  font-weight: 300;
+  margin-bottom: 3rem;
+  opacity: 0.95;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+/* Buttons */
+.cta-button {
+  display: inline-block;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+  cursor: pointer;
+}
+
+.cta-button.primary {
+  background-color: white;
+  color: var(--accent);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.cta-button.primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+  background-color: #f8fafc;
+}
+
+.cta-button.secondary {
+  background-color: transparent;
+  border: 2px solid rgba(255,255,255,0.8);
+  color: white;
+}
+
+.cta-button.secondary:hover {
+  background-color: rgba(255,255,255,0.1);
+  transform: translateY(-3px);
+}
+
+/* ============================================================
+   FEATURES GRID
+   ------------------------------------------------------------ */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2.5rem;
+}
+
+.feature-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 3rem 2rem;
+  border-radius: var(--radius);
+  text-align: center;
+  transition: transform 0.3s ease;
+  box-shadow: var(--shadow); /* Better shadow */
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--accent);
+}
+
+.feature-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+/* ============================================================
+   VIDEO SECTION
+   ------------------------------------------------------------ */
+.video-section {
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.video-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.video-wrapper {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 4px solid var(--bg-color); /* Added border to make it pop */
+}
+
+.video-wrapper video {
+  width: 100%;
+  display: block;
+}
+
+.video-text h3 {
+  font-size: 2.2rem;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+  font-weight: 800;
+}
+
+.video-text p {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+
+/* ============================================================
+   TEAM GRID
+   ------------------------------------------------------------ */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 2rem;
+}
+
+.team-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 2rem;
+  border-radius: var(--radius);
+  text-align: center;
+  transition: transform 0.2s ease;
+  box-shadow: var(--shadow);
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent);
+}
+
+.team-avatar {
+  width: 80px;
+  height: 80px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 auto 1.5rem auto;
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+}
+
+.team-card h5 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.team-role {
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(0,0,0,0.03);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* Footer */
+.landing-footer {
+  text-align: center;
+  padding: 4rem 0;
+  background-color: var(--bg-color);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .video-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .hero-title {
+    font-size: 3.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  .hero-actions {
+    flex-direction: column;
+  }
+}

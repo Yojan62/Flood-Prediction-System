@@ -1,49 +1,89 @@
-import React from 'react';
+import React from "react";
+import "./SummaryCard.css";
 
-// Defines the SummaryCard component, which displays key forecast information.
-// It expects to receive a 'data' object prop containing summary details.
-function SummaryCard({ data }) {
+function SummaryCard({ data, loading = false, dangerThreshold }) {
+  if (!data && !loading) {
+    return (
+      <div className="card" id="summary">
+        <h2>Forecast Summary</h2>
+        <p className="summary-empty-state">
+          Select a location to view its current risk and peak water level.
+        </p>
+      </div>
+    );
+  }
 
-  // Helper function to determine the CSS class based on the risk value for styling.
-  const getRiskClass = (risk) => {
-    if (risk === 'low') return 'risk-low';
-    if (risk === 'medium') return 'risk-medium';
-    if (risk === 'high') return 'risk-high';
-    return ''; // Returns empty string if risk level is unknown or not provided.
+  const { currentRisk, peakLevel, lastUpdated } = data || {};
+
+  const risk = currentRisk ? String(currentRisk).toLowerCase() : null;
+
+  const getRiskClass = (level) => {
+    switch (level) {
+      case "low":
+        return "risk-low";
+      case "medium":
+        return "risk-medium";
+      case "high":
+        return "risk-high";
+      default:
+        return "";
+    }
   };
 
-  // Destructures the 'data' prop object to extract specific values.
-  // Provides default fallback values ('N/A') if 'data' or its properties are missing.
-  // Corrected typo: 'currnetRisk' changed to 'currentRisk'.
-  const { currentRisk = 'N/A', peakLevel = 'N/A', lastUpdated = 'N/A' } = data || {};
+  const peakNumber =
+    peakLevel != null && !isNaN(Number(peakLevel))
+      ? Number(peakLevel)
+      : null;
 
-  // Returns the JSX structure for the summary card.
+  const thresholdNumber =
+    dangerThreshold != null && !isNaN(Number(dangerThreshold))
+      ? Number(dangerThreshold)
+      : null;
+
   return (
-    // Uses the generic 'card' class and a specific ID for styling.
     <div className="card" id="summary">
       <h2>Forecast Summary</h2>
-      {/* Section to display the current risk level. */}
-      <div className="summary-item" style={{ textAlign: 'center', margin: '15px 0' }}>
-        {/* This is the new "badge" style */}
-        <span className={`risk-badge ${getRiskClass(currentRisk)}`}>
-          {currentRisk}
-        </span>
-      </div>
-      {/* Section to display the peak water level. */}
-      <div className="summary-item">
-        <span>Peak Water Level (24h):</span>
-        {/* Displays the peakLevel value from props, adding 'meters' if it's a number. */}
-        <strong>{peakLevel} {typeof peakLevel === 'number' ? 'meters' : ''}</strong>
-      </div>
-      {/* Section to display the last updated timestamp. */}
-      <div className="summary-item">
-        <span>Last Updated:</span>
-        {/* Displays the lastUpdated value from props. */}
-        <strong>{lastUpdated}</strong>
-      </div>
+
+      {loading && (
+        <p className="summary-empty-state">Loading summary…</p>
+      )}
+
+      {!loading && (
+        <>
+          <div className="summary-item centered">
+            <span className={`risk-badge ${getRiskClass(risk)}`}>
+              {risk
+                ? risk.charAt(0).toUpperCase() + risk.slice(1)
+                : "Unknown"}
+            </span>
+          </div>
+
+          <div className="summary-item">
+            <span>Peak Water Level (24h):</span>
+            <strong>
+              {peakNumber !== null
+                ? `${peakNumber.toFixed(2)} m³/s`
+                : "No data"}
+            </strong>
+          </div>
+
+          {thresholdNumber !== null && (
+            <div className="summary-item">
+              <span>Danger Threshold:</span>
+              <strong>
+                {thresholdNumber.toFixed(2)} m³/s
+              </strong>
+            </div>
+          )}
+
+          <div className="summary-item">
+            <span>Last Updated:</span>
+            <strong>{lastUpdated || "No data"}</strong>
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-// Exports the SummaryCard component for use in other files (like App.js).
 export default SummaryCard;

@@ -1,0 +1,65 @@
+/* ============================================================
+   GLOBAL THEME VARIABLES
+   ------------------------------------------------------------ */
+:root {
+  /* --- Light Mode Colors --- */
+  --bg-color: #f8fafc;       /* Slate-50 */
+  --card-bg: #ffffff;        /* White */
+  --text-main: #1e293b;      /* Slate-800 */
+  --text-muted: #64748b;     /* Slate-500 */
+  --border: #e2e8f0;         /* Slate-200 */
+  /* Softer, more modern shadow */
+  --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+
+  /* --- THEME ACCENT: Forest Green --- */
+  --accent: #15803d;         /* Green-700 */
+  --accent-hover: #166534;   /* Green-800 */
+  --accent-light: rgba(21, 128, 61, 0.1);
+
+  /* --- Risk Colors --- */
+  --risk-high: #ef4444;      /* Red */
+  --risk-medium: #f59e0b;    /* Orange */
+  --risk-low: #10b981;       /* Emerald */
+}
+
+/* --- Dark Mode Colors --- */
+body.dark-theme {
+  --bg-color: #0f172a;       /* Slate-900 */
+  --card-bg: #1e293b;        /* Slate-800 */
+  --text-main: #f1f5f9;      /* Slate-100 */
+  --text-muted: #94a3b8;     /* Slate-400 */
+  --border: #334155;         /* Slate-700 */
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+
+  /* --- THEME ACCENT: Electric Blue --- */
+  --accent: #00BFFF;         /* Deep Sky Blue */
+  --accent-hover: #009ACD;   /* Darker Blue */
+  --accent-light: rgba(0, 191, 255, 0.15);
+}
+
+/* Global Resets */
+body {
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; 
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px; /* Thinner scrollbar */
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}

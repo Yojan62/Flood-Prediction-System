@@ -1,23 +1,26 @@
+// src/components/layout/Header.js
 import React from 'react';
-// Imports the ThemeToggle component to be rendered inside the header.
+import { NavLink } from 'react-router-dom';
 import ThemeToggle from '../UI/ThemeToggle';
+import FlowLogo from '../../assets/Flow.png'; 
 
-// Defines the Header component for the dashboard.
-// It accepts 'theme' and 'toggleTheme' as props from App.js.
 function Header({ theme, toggleTheme }) {
-  // Returns the JSX structure for the header.
   return (
-    // Uses the standard HTML header element, which is styled with flexbox.
-    <header>
-      {/* Displays the main title of the dashboard. */}
-      <h1>Flood Forecasting Dashboard</h1>
-
-      {/* Renders the ThemeToggle component. */}
-      {/* Passes the 'theme' and 'toggleTheme' props down to the toggle switch. */}
-      <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+    // Using your class "main-navbar"
+    <header className="main-navbar">
+      <NavLink className="nav-logo" to="/">
+        <img src={FlowLogo} alt="Flow Logo" />
+        <span>FLOW</span>
+      </NavLink>
+      
+      <nav className="nav-links">
+        <NavLink to="/" end>Home</NavLink>
+        <NavLink to="/dashboard">Dashboard</NavLink>
+        <NavLink to="/safety-guidance">Safety</NavLink>
+        <ThemeToggle theme={theme} toggleTheme={toggleTheme} />
+      </nav>
     </header>
   );
 }
 
-// Exports the Header component so it can be used in App.js.
 export default Header;

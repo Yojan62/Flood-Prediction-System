@@ -1,57 +1,54 @@
-// src/App.js
-import React, { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect, Suspense } from "react";
+import { Routes, Route } from "react-router-dom";
+import './App.css';
 
-// --- Import Pages ---
-// You'll need to update this path based on your new folder structure
-import Dashboard from './pages/Dashboard/Dashboard'; 
-// import About from './pages/About/About'; // Example of adding a new page
-
-// --- Import Global Components ---
-// You'll need to update this path based on your new folder structure
-import Layout from './components/Layout/Layout'; 
+// --- LAZY LOAD COMPONENTS ---
+// Ensure these paths match your actual folder structure exactly.
+// Based on your uploads, they seem to be nested: src/pages/Name/Name.js
+const Layout = React.lazy(() => import("./components/Layout/Layout"));
+const LandingPage = React.lazy(() => import("./pages/LandingPage/LandingPage"));
+const Dashboard = React.lazy(() => import("./pages/Dashboard/Dashboard"));
+const SafetyGuidance = React.lazy(() => import("./pages/SafetyGuidance/SafetyGuidance"));
 
 function App() {
-  // --- Global State ---
-  // We "lifted" the theme state up from Dashboard
-  // so we can pass it to the global Layout and Header.
-  const [theme, setTheme] = useState('light');
+  // Initialize theme state
+  const storedTheme = localStorage.getItem("theme") || "light";
+  const [theme, setTheme] = useState(storedTheme);
 
+  // Toggle function passed to Navbar/Layout
   const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    setTheme(prev => (prev === "light" ? "dark" : "light"));
   };
 
-  // --- Global Effect ---
-  // This applies the theme to the entire page.
+  // Apply theme class to body
   useEffect(() => {
-    document.body.className = ''; // Clears any existing theme classes.
-    document.body.classList.add(theme + '-theme'); // Adds the current theme class.
+    document.body.className = "";
+    if (theme === "dark") {
+      document.body.classList.add("dark-theme");
+    }
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   return (
-    <Routes>
-      {/* This parent Route uses your Layout component. 
-        All child routes (like Dashboard) will be rendered 
-        inside the <Outlet /> in your Layout.
-      */}
-      <Route 
-        path="/" 
-        element={<Layout theme={theme} toggleTheme={toggleTheme} />}
-      >
-        {/* The 'index' route is the default component for "/" (your homepage) */}
+    // Suspense must wrap lazy-loaded components
+    <Suspense fallback={<div className="loading-screen">Loading...</div>}>
+      <Routes>
+        
+        {/* 1. Landing Page (Standalone - No Layout wrapper) */}
+        {/* We pass theme props so the Navbar inside LandingPage works */}
         <Route 
-          index 
-          element={<Dashboard theme={theme} />} 
+          path="/" 
+          element={<LandingPage theme={theme} toggleTheme={toggleTheme} />} 
         />
-        
-        {/* --- THIS IS HOW TO ADD A NEW PAGE --- */}
-        {/* <Route path="about" element={<About />} /> */}
-        
-        {/* You could add more pages here, like a detail page */}
-        {/* <Route path="location/:id" element={<LocationDetailPage />} /> */}
 
-      </Route>
-    </Routes>
+        {/* 2. Dashboard & Safety (Wrapped in Layout) */}
+        <Route element={<Layout theme={theme} toggleTheme={toggleTheme} />}>
+          <Route path="/dashboard" element={<Dashboard theme={theme} />} />
+          <Route path="/safety-guidance" element={<SafetyGuidance />} />
+        </Route>
+
+      </Routes>
+    </Suspense>
   );
 }
 

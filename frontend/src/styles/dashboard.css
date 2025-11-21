@@ -1,0 +1,157 @@
+/* ============================================================
+   DASHBOARD LAYOUT
+   ------------------------------------------------------------ */
+.dashboard-page {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 Column Grid */
+  gap: 1.5rem;
+  grid-auto-rows: minmax(200px, auto);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+  .dashboard-page { padding: 1rem; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   SHARED CARD STYLES
+   ------------------------------------------------------------ */
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); 
+}
+
+.card h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-main);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.75rem;
+}
+
+/* Grid Spans */
+.full { grid-column: span 4; }
+.wide { grid-column: span 2; }
+
+@media (max-width: 1024px) {
+  .full, .wide { grid-column: span 2; }
+}
+@media (max-width: 768px) {
+  .full, .wide { grid-column: span 1; }
+}
+
+/* ============================================================
+   COMPONENT SPECIFIC
+   ------------------------------------------------------------ */
+
+/* Map Card */
+#map-card {
+  padding: 0; /* Map needs to touch edges */
+  overflow: hidden;
+  min-height: 500px;
+}
+#map-card h2 {
+  margin: 1rem 1rem 0 1rem; /* Bring title back in */
+  position: absolute;
+  z-index: 999;
+  background: var(--card-bg);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border-bottom: none;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Forecast Graph */
+#forecast-graph-container {
+  min-height: 400px;
+}
+.chart-container {
+  flex-grow: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Summary Card - Badges */
+.risk-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+.risk-low { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; }
+.risk-medium { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid #f59e0b; }
+.risk-high { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid #ef4444; }
+
+/* Summary Items */
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.summary-item:last-child { border-bottom: none; }
+.summary-item strong { font-size: 1.2rem; color: var(--accent); }
+
+/* ============================================================
+   ALERT SUBSCRIPTION FORM
+   ------------------------------------------------------------ */
+.subscription-form {
+  display: flex;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+.subscription-input {
+  flex: 1;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-color);
+  color: var(--text-main);
+}
+
+.subscription-button {
+  background-color: var(--accent);
+  color: white;
+  border: none;
+  padding: 0 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.subscription-button:hover {
+  background-color: var(--accent-hover);
+}
+
+.subscription-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
