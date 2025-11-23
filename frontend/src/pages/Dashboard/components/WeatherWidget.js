@@ -1,68 +1,87 @@
 // src/pages/Dashboard/components/WeatherWidget.js
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { fetchLocalWeather } from '../../../services/api'; 
 import './WeatherWidget.css';
 
 function WeatherWidget({ coords }) {
   const [weatherData, setWeatherData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // 👇 NEW: Track precise status instead of just 'loading'
+  const [status, setStatus] = useState('idle'); // Options: 'idle' | 'loading' | 'success' | 'error'
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
-    // If coords are not selected, show message
+    // 1. If no location selected, reset to idle
     if (!coords) {
-      setLoading(false);
-      setError('Please select a location.');
+      setStatus('idle');
       setWeatherData(null);
       return;
     }
 
-    const [lat, lon] = coords;
-    const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
+    const loadWeather = async () => {
+      setStatus('loading');
+      setErrorMessage('');
+      
+      try {
+        const [lat, lon] = coords;
+        
+        // 2. CALL THE SERVICE (No axios here!)
+        const data = await fetchLocalWeather(lat, lon);
+        
+        setWeatherData(data);
+        setStatus('success');
+      } catch (error) {
+        console.error('Weather fetch error:', error);
+        setStatus('error');
+        setErrorMessage('Could not load weather data.');
+      }
+    };
 
-    setLoading(true);
-    setError('');
-    setWeatherData(null);
+    loadWeather();
+  }, [coords]); // Re-run whenever coordinates change
 
-    axios
-      .get(
-        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`
-      )
-      .then((res) => {
-        setWeatherData(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Weather fetch error:', err);
-        setError('Could not fetch weather data.');
-        setLoading(false);
-      });
-  }, [coords]);
+  /* ------------------------------
+     Helper: Get Icon URL
+  ------------------------------ */
+  const getIconUrl = (iconCode) => 
+    `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
 
   return (
     <div className="card" id="weather-widget">
-      {/* TITLE */}
+      {/* TITLE HEADER */}
       <h3>
-        {weatherData ? `Weather in ${weatherData.name}` : 'Current Weather'}
+        {status === 'success' && weatherData 
+          ? `Weather in ${weatherData.name}` 
+          : 'Current Weather'}
       </h3>
 
-      {/* LOADING */}
-      {loading && <p className="weather-loading">Loading weather...</p>}
+      {/* STATE 1: IDLE (User hasn't clicked map yet) */}
+      {status === 'idle' && (
+        <p className="weather-placeholder">Select a location on the map</p>
+      )}
 
-      {/* ERROR */}
-      {error && <p className="weather-error">{error}</p>}
+      {/* STATE 2: LOADING */}
+      {status === 'loading' && (
+        <div className="weather-loading">
+           <span className="spinner small"></span> Loading...
+        </div>
+      )}
 
-      {/* CONTENT */}
-      {!loading && !error && weatherData && (
-        <>
+      {/* STATE 3: ERROR */}
+      {status === 'error' && (
+        <p className="weather-error">{errorMessage}</p>
+      )}
+
+      {/* STATE 4: SUCCESS */}
+      {status === 'success' && weatherData && (
+        <div className="weather-content animate-fade-in">
+          
           <div className="weather-main">
             <img
               className="weather-icon"
-              src={`http://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`}
+              src={getIconUrl(weatherData.weather[0].icon)}
               alt={weatherData.weather[0].description}
             />
-
             <div className="weather-temp">
               {Math.round(weatherData.main.temp)}°C
             </div>
@@ -71,7 +90,13 @@ function WeatherWidget({ coords }) {
           <p className="weather-description">
             {weatherData.weather[0].description}
           </p>
-        </>
+
+          {/* Bonus: Extra Details (Humidity & Wind) */}
+          <div className="weather-details">
+             <span>💧 {weatherData.main.humidity}%</span>
+             <span style={{marginLeft: '10px'}}>💨 {Math.round(weatherData.wind.speed)} m/s</span>
+          </div>
+        </div>
       )}
     </div>
   );

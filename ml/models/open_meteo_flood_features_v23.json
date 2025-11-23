@@ -1,0 +1,29 @@
+{
+  "features": [
+    "discharge_m3_s",
+    "dis_lag1",
+    "dis_lag2",
+    "dis_lag3",
+    "dis_lag4",
+    "dis_lag5",
+    "dis_lag6",
+    "dis_lag7",
+    "dis_rate",
+    "dis_roll_3",
+    "dis_roll_7",
+    "rain_lag_1",
+    "rain_lag_2",
+    "rain_lag_3",
+    "rain_roll_3",
+    "rain_roll_7",
+    "api",
+    "rainfall_forecast_1d",
+    "relative_humidity",
+    "humidity_lag_1",
+    "rain_x_humidity",
+    "month_sin",
+    "month_cos",
+    "day_of_year"
+  ],
+  "lead_days": 1
+}

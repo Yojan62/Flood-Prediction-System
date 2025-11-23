@@ -1,313 +1,189 @@
 import os
-import joblib
-import numpy as np
-import pandas as pd
-import requests
+import sys
 import datetime as dt
-from sqlalchemy.orm import Session
-from dotenv import load_dotenv
 
-# DB / email imports (my project modules)
-import database
-import models
+from dotenv import load_dotenv
+from sqlalchemy.orm import Session
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-# --- 1. Configuration & Model Loading ---
 
-# Defines the paths to check for the model file.
-# This variable is defined at the top, so it will be
-# available for the load_model() function below.
-MODEL_REL_PATHS = [
-    # This path is correct for your 'ml/ml' structure 
-    os.path.join(os.path.dirname(__file__), '..', 'ml', 'ml', 'open_meteo_flood_model_v18.pkl'),
-    # Add any other backup paths here if needed
-]
-OPEN_METEO_FORECAST_URL = "https://api.open-meteo.com/v1/forecast"
-DEFAULT_LAT = 23.81
-DEFAULT_LON = 90.41
-TIMEOUT = 15
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
 
-# -------------------------
-# Model loader (robust)
-# -------------------------
-def load_model(): # <-- The function is named 'load_model'
-    """
-    I'll load the v18 model bundle from the .pkl file.
-    """
-    model_obj = None
-    # The 'MODEL_REL_PATHS' variable is now defined and can be used here.
-    for p in MODEL_REL_PATHS:
-        try:
-            p_abs = os.path.abspath(p)
-            if os.path.exists(p_abs):
-                print(f"Loading model from: {p_abs}")
-                loaded = joblib.load(p_abs)
-                
-                if isinstance(loaded, dict):
-                    # Unpacks the v18 bundle
-                    model = loaded.get('lgb_model')
-                    features = loaded.get('feature_names')
-                    scaler = loaded.get('scaler')
-                    threshold = loaded.get('thr')
-                    use_log_target = True # v18 model uses a log target
-                    
-                    if not all([model, features, scaler, threshold is not None]):
-                        print(f"Error: Model bundle at {p_abs} is missing keys (lgb_model, feature_names, scaler, thr).")
-                        continue
-                        
-                    print("Model bundle loaded successfully.")
-                    return {'model': model, 'features': features, 'use_log_target': use_log_target, 'scaler': scaler, 'thr': threshold}
-                else:
-                    # Fallback for older, raw models
-                    print(f"Warning: Loaded a raw model file from {p_abs}. This is not the v18 bundle.")
-                    model = loaded
-                    return {'model': model, 'features': None, 'use_log_target': False, 'scaler': None, 'thr': 10000.0} # Fallback
-        except Exception as e:
-            print(f"Error loading {p}: {e}")
-    print("No valid model found in expected locations.")
-    return None
+# 1. Add paths to sys.path so imports work
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
-# -------------------------
-# Feature Engineering (from v18)
-# -------------------------
-def engineer_features(daily: pd.DataFrame, lead_days: int) -> pd.DataFrame:
-    """Create features (exactly as in flood_model_v18.py) ."""
-    df = daily.copy()
-    # Basic derived vars
-    df["tmean"] = (df["tmax"] + df["tmin"]) / 2.0
-    df["diurnal_range"] = df["tmax"] - df["tmin"]
-    df["precip_roll3"] = df["precip"].rolling(3, min_periods=1).sum()
-    df["precip_roll7"] = df["precip"].rolling(7, min_periods=1).sum()
-    df["rain_roll7"] = df["rain"].rolling(7, min_periods=1).sum()
-    df["et0_roll7"] = df["et0"].rolling(7, min_periods=1).sum()
-    df["tmean_roll7"] = df["tmean"].rolling(7, min_periods=1).mean()
-    # Lags
-    for l in [1, 2, 3, 7, 14]:
-        df[f"precip_lag{l}"] = df["precip"].shift(l)
-        df[f"rain_lag{l}"] = df["rain"].shift(l)
-        df[f"tmean_lag{l}"] = df["tmean"].shift(l)
-    # Drop rows with NaNs created by the 14-day lag
-    df = df.iloc[14:].copy() 
-    return df
+# 2. Explicitly load .env from the backend folder
+env_path = os.path.join(current_dir, '.env')
+load_dotenv(dotenv_path=env_path)
+# ----------------
 
-# -------------------------
-# Fetch and assemble live features (robust)
-# -------------------------
-def get_live_features_for_model(lat=DEFAULT_LAT, lon=DEFAULT_LON, expected_features=None):
-    """
-    Returns: (feature_vector_df, meta) or (None, error_message)
-    feature_vector_df: single-row DataFrame with columns matching expected_features
-    """
-    if expected_features is None:
-        return None, "Error: 'expected_features' list not provided by model bundle."
+# Now standard imports should work
+import database
+import models
 
-    try:
-        # 1) Fetch live weather data
-        # We must fetch the last 30 days for all lags and rolling averages
-        params = {
-            "latitude": lat,
-            "longitude": lon,
-            "daily": [
-                "precipitation_sum",
-                "rain_sum",
-                "temperature_2m_max",
-                "temperature_2m_min",
-                "windspeed_10m_max",
-                "shortwave_radiation_sum",
-                "et0_fao_evapotranspiration"
-            ],
-            "past_days": 30, # Must be >= 14 for the lags in engineer_features
-            "forecast_days": 1, # We only need today's data
-            "timezone": "UTC",
-        }
-        
-        r_weather = requests.get(OPEN_METEO_FORECAST_URL, params=params, timeout=TIMEOUT)
-        r_weather.raise_for_status()
-        weather_json = r_weather.json()
+# Import the new hybrid model prediction helper
+from ml.predict import predict_recent_days
 
-        if 'daily' not in weather_json:
-            return None, "Open-Meteo API did not return 'daily' data."
+# Load environment variables
+load_dotenv()
 
-        # 2) Convert to DataFrame and rename
-        daily = pd.DataFrame(weather_json["daily"])
-        daily["time"] = pd.to_datetime(daily["time"])
-        daily = daily.set_index("time").sort_index()
-
-        # I'll rename columns to the short names my 'engineer_features' function expects
-        daily = daily.rename(columns={
-            "precipitation_sum": "precip",
-            "rain_sum": "rain",
-            "temperature_2m_max": "tmax",
-            "temperature_2m_min": "tmin",
-            "windspeed_10m_max": "wind",
-            "shortwave_radiation_sum": "swrad",
-            "et0_fao_evapotranspiration": "et0",
-        })
-
-        # 3) Engineer features (using the *exact* same function from v18 script)
-        df_features = engineer_features(daily, lead_days=0)
-        
-        # 4) Get the *very last row* of features (this is "today")
-        #    and ensure it only has the columns the model expects
-        latest_features_row = df_features[expected_features].iloc[-1:]
-        
-        if latest_features_row.empty:
-            return None, "Feature engineering resulted in empty data."
-            
-        print("Successfully fetched and engineered live features.")
-        # Return the single-row DataFrame
-        return latest_features_row, None
-
-    except Exception as e:
-        return None, f"Exception while fetching live features: {e}"
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+SENDGRID_FROM_EMAIL = os.getenv("SENDGRID_FROM_EMAIL")
 
 
-# -------------------------
-# SendGrid helper (unchanged)
-# -------------------------
-def send_flood_alert(user_email, location_name, risk_level, predicted_discharge):
+def send_flood_alert(
+    user_email: str,
+    location_name: str,
+    risk_level: str,
+    predicted_discharge: float,
+    date_str: str,
+) -> None:
     """
     Sends a single flood alert email using SendGrid.
     """
-    sendgrid_api_key = os.getenv("SENDGRID_API_KEY")
-    from_email = os.getenv("SENDGRID_FROM_EMAIL")
-    if not sendgrid_api_key or not from_email:
-        print("Error: SendGrid credentials not configured.")
+    if not SENDGRID_API_KEY or not SENDGRID_FROM_EMAIL:
+        print("SendGrid credentials not configured. Skipping email.")
         return
 
-    # Creates an email message with the discharge data
     message = Mail(
-        from_email=from_email,
+        from_email=SENDGRID_FROM_EMAIL,
         to_emails=user_email,
-        subject=f"FLOOD ALERT: {risk_level} Risk Detected for {location_name}",
+        subject=f"FLOOD ALERT: {risk_level} risk detected for {location_name}",
         html_content=f"""
-            <strong>This is an automated flood alert for {location_name}.</strong>
-            <p>A new prediction has detected a <strong>{risk_level}</strong> risk of flooding.</p>
-            <p>The predicted flood metric (discharge proxy) for tomorrow is <strong>{predicted_discharge:.2f}</strong>.</p>
-            <p>Please take necessary precautions.</p>
-        """
+            <strong>Flood alert for {location_name}</strong>
+            <p>Date: <strong>{date_str}</strong></p>
+            <p>Combined flood risk level: <strong>{risk_level}</strong></p>
+            <p>Predicted discharge index: <strong>{predicted_discharge:.2f}</strong></p>
+            <p>Please take appropriate precautions.</p>
+        """,
     )
-    
+
     try:
-        sg = SendGridAPIClient(sendgrid_api_key)
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
         sg.send(message)
         print(f"Successfully sent alert to {user_email}")
     except Exception as e:
         print(f"Error sending email to {user_email}: {e}")
-        
-# -------------------------
-# Main prediction cycle
-# -------------------------
-def run_prediction_cycle():
-    """
-    Main function to run the prediction, save it, and trigger alerts.
-    """
-    model_bundle = load_model()
-    if not model_bundle:
-        print("Model bundle is not loaded. Aborting prediction cycle.")
-        return
-        
-    # I'll unpack the v18 model bundle
-    model = model_bundle['model']
-    features_expected = model_bundle['features']
-    use_log_target = model_bundle['use_log_target']
-    scaler = model_bundle['scaler']
-    DANGER_DISCHARGE = model_bundle['thr'] # The threshold calculated during training
-    MEDIUM_DISCHARGE = DANGER_DISCHARGE * 0.8 # 80% of danger level
 
-    print(f"--- Starting new prediction cycle (Model v18) ---")
-    print(f"Flood Threshold set to: {DANGER_DISCHARGE:.2f}")
-    
+
+def run_prediction_cycle(days: int = 3) -> None:
+    """
+    Main function to:
+      - Run the hybrid ML + Global Flood predictions
+      - Save them into the database
+      - Trigger email alerts for HIGH risk days
+
+    Parameters
+    ----------
+    days : int
+        Number of recent days (including today) to predict and store.
+    """
+    print(f"--- Starting prediction cycle for last {days} day(s) ---")
+
     db: Session = database.SessionLocal()
-    
+
     try:
-        # I'll process all locations in my database
         locations = db.query(models.Location).all()
         if not locations:
-            print("No locations found in database. Add locations via 'batch_upload_all.py' or API.")
+            print("No locations found in database. Add locations first.")
             return
 
         for location in locations:
             print(f"\nProcessing location: {location.name} (ID: {location.location_id})")
-            
-            # --- 1. Get Live Data ---
-            # This returns a single-row DataFrame
-            feature_df, error = get_live_features_for_model(
-                lat=location.latitude, 
-                lon=location.longitude, 
-                expected_features=features_expected
-            )
-            
-            if feature_df is None:
-                print(f"Could not get live data for {location.name}: {error}")
-                continue # Skip to the next location
 
-            # --- 2. Run the REAL Model ---
-            
-            # --- THIS IS THE FIX ---
-            # 1. Get the feature values as an array (no names) for the scaler
-            X_unscaled_values = feature_df[features_expected].values
-            
-            # 2. Scale the data (Array -> Array)
-            X_scaled_values = scaler.transform(X_unscaled_values)
-            
-            # 3. Convert the scaled array *back* to a DataFrame with names for the model
-            X_scaled_df = pd.DataFrame(X_scaled_values, columns=features_expected)
-            # --- END FIX ---
-            
-            # Predict using the DataFrame
+            # 1) Get recent predictions from the ML pipeline
             try:
-                y_pred_raw = model.predict(X_scaled_df)[0]
-                
-                # I must invert the log (np.expm1) if the model was trained on a log target
-                if use_log_target:
-                    predicted_discharge = float(np.expm1(y_pred_raw))
-                else:
-                    predicted_discharge = float(y_pred_raw)
-
-            # ... (rest of the try/except block) ...
+                df = predict_recent_days(
+                    lat=location.latitude,
+                    lon=location.longitude,
+                    days=days,
+                )
             except Exception as e:
-                print("Prediction failed:", e)
+                print(f"Prediction failed for {location.name}: {e}")
                 continue
 
-            # --- 3. Determine Risk Level ---
-            risk_level = "LOW"
-            if predicted_discharge >= DANGER_DISCHARGE:
-                risk_level = "HIGH"
-            elif predicted_discharge >= MEDIUM_DISCHARGE:
-                risk_level = "MEDIUM"
-            
-            print(f"Prediction for {location.name}: {risk_level} (Predicted Discharge: {predicted_discharge:.2f})")
+            if df.empty:
+                print(f"No prediction data returned for {location.name}.")
+                continue
 
-            # --- 4. SAVE THE PREDICTION TO THE DATABASE ---
-            # (This part is correct)
-            db_prediction = models.Prediction(
-                location_id=location.location_id,
-                predicted_discharge=predicted_discharge, 
-                risk_level=risk_level
-            )
-            db.add(db_prediction)
-            db.commit()
-            print(f"Successfully saved prediction {db_prediction.prediction_id} to database.")
+            # 2) Loop over each predicted day
+            for ts, row in df.iterrows():
+                # ts is a pandas.Timestamp
+                date_only = ts.date()
+                date_str = date_only.isoformat()
 
-            # --- 5. TRIGGER ALERTS IF RISK IS HIGH ---
-            # (This part is correct)
-            if db_prediction.risk_level == "HIGH":
-                print(f"Risk is HIGH for {location.name}. Checking for subscribed users...")
-                
-                users_to_alert = db.query(models.User).filter(
-                    models.User.subscribed_location_id == location.location_id
-                ).all()
+                predicted_discharge = float(row["pred_final"])
 
-                if not users_to_alert:
-                    print("No users are subscribed to this location. No alerts sent.")
+                # Use the combined risk level from the ML + GloFAS fusion.
+                # Fallback to 'low' if the column is missing.
+                risk_level = str(row.get("risk_combined_level", "low")).upper()
+
+                # OPTIONAL: override with location-specific danger_threshold if set
+                if location.danger_threshold is not None:
+                    if predicted_discharge >= location.danger_threshold:
+                        risk_level = "HIGH"
+                    elif predicted_discharge >= 0.8 * location.danger_threshold:
+                        risk_level = max(risk_level, "MEDIUM")  # keep worst case
+
+                # Avoid inserting duplicate predictions for the same day/location
+                existing = (
+                    db.query(models.Prediction)
+                    .filter(
+                        models.Prediction.location_id == location.location_id,
+                        models.Prediction.prediction_timestamp == date_only,
+                    )
+                    .first()
+                )
+                if existing:
+                    print(f"Prediction already exists for {location.name} on {date_str}. Skipping insert.")
+                    continue
+
+                # 3) Save prediction into DB
+                db_prediction = models.Prediction(
+                    location_id=location.location_id,
+                    predicted_discharge=predicted_discharge,
+                    risk_level=risk_level,
+                    prediction_timestamp=dt.datetime.combine(
+                        date_only, dt.time.min
+                    ),  # store as midnight UTC for that day
+                )
+                db.add(db_prediction)
+                db.commit()
+                db.refresh(db_prediction)
+
+                print(
+                    f"Saved prediction {db_prediction.prediction_id} "
+                    f"for {location.name} on {date_str}: "
+                    f"{predicted_discharge:.2f} ({risk_level})"
+                )
+
+                # 4) Trigger alerts if risk is HIGH
+                if risk_level == "HIGH":
+                    users_to_alert = (
+                        db.query(models.User)
+                        .filter(models.User.subscribed_location_id == location.location_id)
+                        .all()
+                    )
+
+                    if not users_to_alert:
+                        print("No users subscribed to this location. No alerts sent.")
+                    else:
+                        print(f"Sending alerts to {len(users_to_alert)} subscribed user(s).")
+                        for user in users_to_alert:
+                            send_flood_alert(
+                                user_email=user.email,
+                                location_name=location.name,
+                                risk_level=risk_level,
+                                predicted_discharge=predicted_discharge,
+                                date_str=date_str,
+                            )
                 else:
-                    print(f"Found {len(users_to_alert)} user(s) to alert.")
-                    for user in users_to_alert:
-                        send_flood_alert(user.email, location.name, db_prediction.risk_level, predicted_discharge)
-            else:
-                print("Risk is not HIGH. No alerts will be sent.")
+                    print(f"Risk is {risk_level} for {location.name} on {date_str}. No alerts sent.")
 
     except Exception as e:
         print(f"An error occurred during the prediction cycle: {e}")
@@ -316,6 +192,6 @@ def run_prediction_cycle():
         db.close()
         print("\n--- Prediction cycle finished ---")
 
+
 if __name__ == "__main__":
-    load_dotenv() # Loads my .env file
-    run_prediction_cycle()
+    run_prediction_cycle(days=3)

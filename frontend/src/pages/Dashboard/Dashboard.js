@@ -25,7 +25,7 @@ function Dashboard({ theme }) {
   });
 
   /* ------------------------------
-     Fetch Locations
+      Fetch Locations
   ------------------------------ */
   useEffect(() => {
     const fetchLocations = async () => {
@@ -42,7 +42,7 @@ function Dashboard({ theme }) {
   }, []);
 
   /* ------------------------------
-     Fetch Predictions
+      Fetch Predictions
   ------------------------------ */
   useEffect(() => {
     const fetchPredictionData = async () => {
@@ -72,6 +72,7 @@ function Dashboard({ theme }) {
             lastUpdated: new Date(latest.prediction_timestamp).toLocaleString()
           });
 
+          // Update Map Center logic
           const loc = locations.find(l => l.location_id === selectedLocation);
           if (loc) {
             const coords = [loc.latitude, loc.longitude];
@@ -101,7 +102,15 @@ function Dashboard({ theme }) {
 
 
   /* ------------------------------
-     Layout
+     ⚠️ FIX: Calculate Threshold Here
+     This makes it available to the JSX below
+  ------------------------------ */
+  const selectedLocObj = locations.find(l => l.location_id === selectedLocation);
+  const currentDangerThreshold = selectedLocObj ? selectedLocObj.danger_threshold : null;
+
+
+  /* ------------------------------
+      Layout
   ------------------------------ */
   return (
     <div className="dashboard-page">
@@ -125,7 +134,7 @@ function Dashboard({ theme }) {
           <div className="full">
             <Forecastgraph 
               forecastData={forecastData} 
-              dangerThreshold={7.52}
+              dangerThreshold={currentDangerThreshold} // Now this variable exists!
               theme={theme}
             />
           </div>
