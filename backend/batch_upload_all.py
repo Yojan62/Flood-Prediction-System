@@ -131,18 +131,7 @@ LOCATIONS_DATA = [
     {"name": "Bandarban", "latitude": 22.194878, "longitude": 92.216246},
     {"name": "Dohazari", "latitude": 22.15791, "longitude": 92.063472},
     {"name": "Lama", "latitude": 21.793554, "longitude": 92.209356},
-    {"name": "Chiringa", "latitude": 21.773552, "longitude": 92.079743},
-    # Bangkok Locations
-    {"name": "Phra Nakhon", "latitude": 13.7525, "longitude": 100.4931},
-    {"name": "Bang Kapi", "latitude": 13.7563, "longitude": 100.6207},
-    {"name": "Thonburi", "latitude": 13.7247, "longitude": 100.4742},
-    {"name": "Chatuchak", "latitude": 13.8206, "longitude": 100.5543},
-    {"name": "Pathum Wan", "latitude": 13.7461, "longitude": 100.5341},
-    {"name": "Bangkok Noi", "latitude": 13.7605, "longitude": 100.4823},
-    {"name": "Sathon", "latitude": 13.7207, "longitude": 100.5266},
-    {"name": "Ratchathewi", "latitude": 13.7547, "longitude": 100.5340},
-    {"name": "Bang Sue", "latitude": 13.8211, "longitude": 100.5415},
-    {"name": "Don Muang", "latitude": 13.9125, "longitude": 100.6006}
+    {"name": "Chiringa", "latitude": 21.773552, "longitude": 92.079743}
 ]
 
 # This is the URL of your local backend API endpoint 

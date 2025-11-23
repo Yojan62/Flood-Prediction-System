@@ -42,6 +42,7 @@ class Location(BaseModel):
     name: str
     latitude: float
     longitude: float
+    danger_threshold: float | None = None
 
     class Config:
         from_attributes = True

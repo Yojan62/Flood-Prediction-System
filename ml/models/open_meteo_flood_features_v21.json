@@ -1,0 +1,1 @@
+{"features": ["discharge_m3_s", "dis_lag1", "dis_lag2", "dis_lag3", "dis_lag7", "dis_rate", "dis_roll_3", "dis_roll_7", "month_sin", "month_cos", "day_of_year"], "lead_days": 1}
